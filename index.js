@@ -1,0 +1,138 @@
+import fs from 'fs'
+import path from 'path'
+import webpack from 'webpack'
+import CleanCSSPlugin from 'less-plugin-clean-css'
+import lessPluginGlob from 'less-plugin-glob'
+import autoprefixer from 'autoprefixer'
+import ExtractTextPlugin from 'extract-text-webpack-plugin'
+import IconfontWebpackPlugin from 'iconfont-webpack-plugin'
+import nodeExternals from 'webpack-node-externals'
+import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer'
+
+export default function (entry, output) {
+  const src = path.basename(entry)
+  const srcPath = entry.substr(-src.length)
+  const out = path.basename(output)
+  const outPath = output.substr(-out.length)
+
+  const IS_PROD = process.env.NODE_ENV === 'production'
+  const include = [path.resolve(src)]
+
+  const plugin = {
+    ignore: new webpack.IgnorePlugin(/unicode/),
+    less: new ExtractTextPlugin({
+      filename: path.parse(src).name
+    }),
+    env: new webpack.EnvironmentPlugin(['NODE_ENV'])
+  }
+
+  const defaults = {
+    output: {
+      path: path.resolve(outPath),
+      filename: out
+    },
+    entry: path.resolve(entry)
+  }
+
+  function config(env) {
+    console.log(`Compiling for ${env}`)
+    const plugins = Object.values(plugin)
+    if (process.env.ANALYZE)
+      plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerHost: '0.0.0.0',
+          analyzerPort: 29305
+        })
+      )
+    switch (env) {
+      case 'development':
+        return {
+          ...defaults,
+          devtool: '#inline-source-map',
+          plugins
+        }
+      case 'production':
+        return {
+          ...defaults,
+          plugins: [
+            ...plugins,
+            new webpack.optimize.UglifyJsPlugin({
+              compress: {warnings: false}
+            })
+          ]
+        }
+    }
+  }
+
+  return {
+    ...config(process.env.NODE_ENV),
+    stats: {
+      colors: true,
+      hash: false,
+      version: false,
+      timings: true,
+      assets: false,
+      chunks: false,
+      modules: true,
+      reasons: false,
+      children: false,
+      source: false,
+      errors: true,
+      errorDetails: true,
+      warnings: true,
+      publicPath: false
+    },
+    resolve: {
+      modules: [srcPath, 'node_modules']
+    },
+    module: {
+      rules: [
+        {
+          test: /\.js$/,
+          use: ['babel-loader'],
+          include
+        },
+        {
+          test: /\.(css|less)$/,
+          use: plugin.less.extract({
+            use: [
+              {
+                loader: 'css-loader',
+                options: {
+                  sourceMap: !IS_PROD
+                }
+              },
+              {
+                loader: 'postcss-loader',
+                options: {
+                  sourceMap: !IS_PROD,
+                  plugins: loader => [autoprefixer, new IconfontWebpackPlugin(loader)]
+                }
+              },
+              {
+                loader: 'less-loader',
+                options: {
+                  sourceMap: !IS_PROD,
+                  paths: [srcPath, 'node_modules']
+                }
+              }
+            ]
+          }),
+          include
+        },
+        {
+          test: /\.(eot|ttf|woff|woff2)$/,
+          loader: 'file-loader?name=/fonts/[name].[ext]'
+        },
+        {
+          test: /\.(svg|jpg|png)$/,
+          loader: 'file-loader?name=/assets/[name].[ext]'
+        },
+        {
+          test: /\.(glsl|obj)$/,
+          use: 'raw-loader'
+        }
+      ]
+    }
+  }
+}
