@@ -10,10 +10,11 @@ const nodeExternals = require('webpack-node-externals')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 
 module.exports = function (entry, output) {
+  const strip = (str, end) => str.substr(0, str.length-end.length)
   const src = path.basename(entry)
-  const srcPath = entry.substr(-src.length)
+  const srcPath = strip(entry, src)
   const out = path.basename(output)
-  const outPath = output.substr(-out.length)
+  const outPath = strip(output, out)
 
   const IS_PROD = process.env.NODE_ENV === 'production'
   const include = [path.resolve(src)]
