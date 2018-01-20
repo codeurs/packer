@@ -1,15 +1,15 @@
-import fs from 'fs'
-import path from 'path'
-import webpack from 'webpack'
-import CleanCSSPlugin from 'less-plugin-clean-css'
-import lessPluginGlob from 'less-plugin-glob'
-import autoprefixer from 'autoprefixer'
-import ExtractTextPlugin from 'extract-text-webpack-plugin'
-import IconfontWebpackPlugin from 'iconfont-webpack-plugin'
-import nodeExternals from 'webpack-node-externals'
-import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer'
+const fs = require('fs')
+const path = require('path')
+const webpack = require('webpack')
+const CleanCSSPlugin = require('less-plugin-clean-css')
+const lessPluginGlob = require('less-plugin-glob')
+const autoprefixer = require('autoprefixer')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
+const nodeExternals = require('webpack-node-externals')
+const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 
-export default function (entry, output) {
+module.exports = function (entry, output) {
   const src = path.basename(entry)
   const srcPath = entry.substr(-src.length)
   const out = path.basename(output)
