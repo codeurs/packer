@@ -2,7 +2,7 @@
   "name": "packer",
   "version": "0.0.0",
   "description": "Codeurs default webpack config",
-  "main": "index.js",
+  "module": "index.js",
   "repository": "https://bitbucket.org/codeurs/packer",
   "author": "Ben Merckx <ben@codeurs.be>",
   "license": "MIT",
