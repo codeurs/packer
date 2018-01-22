@@ -1,6 +1,6 @@
 {
   "name": "@codeurs/packer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Our webpack config",
   "main": "index.js",
   "repository": "https://github.com/codeurs/packer",
@@ -8,9 +8,9 @@
   "license": "MIT",
   "dependencies": {
     "@babel/core": "^7.0.0-beta.38",
-    "@babel/plugin-transform-proto-to-assign": "^7.0.0-beta.38",
     "@babel/plugin-proposal-class-properties": "^7.0.0-beta.38",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.38",
+    "@babel/plugin-transform-proto-to-assign": "^7.0.0-beta.38",
     "@babel/preset-env": "^7.0.0-beta.38",
     "autoprefixer": "^7.1.6",
     "babel-loader": "8.0.0-beta.0",
