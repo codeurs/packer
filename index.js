@@ -143,16 +143,20 @@ module.exports = function (entry, output) {
         },
         {
           test: /\.(eot|ttf|woff|woff2)$/,
-          loader: 'file-loader',
-          options: {
-            name: '/fonts/[name].[ext]'
+          use: {
+            loader: 'file-loader',
+            options: {
+              name: '/fonts/[name].[ext]'
+            }
           }
         },
         {
           test: /\.(svg|jpg|png)$/,
           use: {
             loader: 'file-loader',
-            name: '/assets/[name].[ext]'
+            options: {
+              name: '/assets/[name].[ext]'
+            }
           }
         },
         {
