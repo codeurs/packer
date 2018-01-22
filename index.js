@@ -1,23 +1,20 @@
 const fs = require('fs')
 const path = require('path')
 const webpack = require('webpack')
-const CleanCSSPlugin = require('less-plugin-clean-css')
-const lessPluginGlob = require('less-plugin-glob')
 const autoprefixer = require('autoprefixer')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
-const nodeExternals = require('webpack-node-externals')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 
+const IS_PROD = process.env.NODE_ENV === 'production'
+const strip = (str, end) => str.substr(0, str.length-end.length)
+
 module.exports = function (entry, output) {
-  const strip = (str, end) => str.substr(0, str.length-end.length)
   const src = path.basename(entry)
   const srcPath = strip(entry, src)
   const out = path.basename(output)
   const outPath = strip(output, out)
-
-  const IS_PROD = process.env.NODE_ENV === 'production'
-  const include = [path.resolve(srcPath)]
+  const include = [path.resolve(srcPath), path.resolve('node_modules/@codeurs')]
 
   const plugin = {
     ignore: new webpack.IgnorePlugin(/unicode/),
@@ -42,7 +39,7 @@ module.exports = function (entry, output) {
       plugins.push(
         new BundleAnalyzerPlugin({
           analyzerHost: '0.0.0.0',
-          analyzerPort: 29305
+          analyzerPort: process.env.ANALYZE
         })
       )
     switch (env) {
@@ -90,11 +87,35 @@ module.exports = function (entry, output) {
       rules: [
         {
           test: /\.js$/,
-          use: ['babel-loader'],
-          include
+          include,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              cacheDirectory: true,
+              presets: [
+                ['@babel/preset-env', {
+                  modules: false,
+                  loose: true,
+                  targets: {
+                    browsers: [
+                        'last 2 versions',
+                        'ie >= 9', 
+                        'safari >= 7'
+                      ]
+                    }
+                }]
+              ],
+              plugins: [
+                '@babel/transform-proto-to-assign',
+                '@babel/plugin-proposal-class-properties',
+                '@babel/plugin-proposal-object-rest-spread'
+              ]
+            }
+          }
         },
         {
           test: /\.(css|less)$/,
+          include,
           use: plugin.less.extract({
             use: [
               {
@@ -118,16 +139,21 @@ module.exports = function (entry, output) {
                 }
               }
             ]
-          }),
-          include
+          })
         },
         {
           test: /\.(eot|ttf|woff|woff2)$/,
-          loader: 'file-loader?name=/fonts/[name].[ext]'
+          loader: 'file-loader',
+          options: {
+            name: '/fonts/[name].[ext]'
+          }
         },
         {
           test: /\.(svg|jpg|png)$/,
-          loader: 'file-loader?name=/assets/[name].[ext]'
+          use: {
+            loader: 'file-loader',
+            name: '/assets/[name].[ext]'
+          }
         },
         {
           test: /\.(glsl|obj)$/,
