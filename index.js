@@ -22,7 +22,7 @@ module.exports = function (entry, output) {
   const plugin = {
     ignore: new webpack.IgnorePlugin(/unicode/),
     less: new ExtractTextPlugin({
-      filename: path.parse(src).name
+      filename: path.parse(output).name + '.css'
     }),
     env: new webpack.EnvironmentPlugin(['NODE_ENV'])
   }
