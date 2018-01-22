@@ -17,7 +17,7 @@ module.exports = function (entry, output) {
   const outPath = strip(output, out)
 
   const IS_PROD = process.env.NODE_ENV === 'production'
-  const include = [path.resolve(src)]
+  const include = [path.resolve(srcPath)]
 
   const plugin = {
     ignore: new webpack.IgnorePlugin(/unicode/),
