@@ -20,6 +20,7 @@
     "iconfont-webpack-plugin": "^1.1.0",
     "less": "^3.0.0-alpha.3",
     "less-loader": "^4.0.5",
+    "less-plugin-lists": "^1.1.1",
     "postcss-loader": "^2.0.8",
     "raw-loader": "^0.5.1",
     "webpack": "^3.7.1",

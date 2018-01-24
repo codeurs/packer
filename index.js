@@ -3,6 +3,7 @@ const path = require('path')
 const webpack = require('webpack')
 const autoprefixer = require('autoprefixer')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const LessPluginLists = require('less-plugin-lists')
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 
@@ -135,7 +136,8 @@ module.exports = function (entry, output) {
                 loader: 'less-loader',
                 options: {
                   sourceMap: !IS_PROD,
-                  paths: [srcPath, 'node_modules']
+                  paths: [srcPath, 'node_modules'],
+                  plugins: [new LessPluginLists()]
                 }
               }
             ]
