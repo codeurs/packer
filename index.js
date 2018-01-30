@@ -153,7 +153,7 @@ module.exports = function (entry, output) {
           }
         },
         {
-          test: /\.(svg|jpg|png)$/,
+          test: /\.(svg|jpg|png|gif|ico)$/,
           use: {
             loader: 'file-loader',
             options: {
