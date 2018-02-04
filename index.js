@@ -82,6 +82,7 @@ module.exports = function (entry, output) {
       publicPath: false
     },
     resolve: {
+      symlinks: false,
       modules: [srcPath, 'node_modules']
     },
     module: {
