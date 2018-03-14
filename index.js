@@ -108,6 +108,7 @@ module.exports = function (entry, output) {
                 }]
               ],
               plugins: [
+                '@babel/syntax-dynamic-import',
                 '@babel/transform-proto-to-assign',
                 '@babel/plugin-proposal-class-properties',
                 '@babel/plugin-proposal-object-rest-spread'
@@ -130,7 +131,10 @@ module.exports = function (entry, output) {
                 loader: 'postcss-loader',
                 options: {
                   sourceMap: !IS_PROD,
-                  plugins: loader => [autoprefixer, new IconfontWebpackPlugin(loader)]
+                  plugins: loader => [
+                    autoprefixer({grid: true}), 
+                    new IconfontWebpackPlugin(loader)
+                  ]
                 }
               },
               {
