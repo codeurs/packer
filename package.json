@@ -6,6 +6,9 @@
   "repository": "https://github.com/codeurs/packer",
   "author": "Ben Merckx <ben@codeurs.be>",
   "license": "MIT",
+  "scripts": {
+    "example": "webpack --watch --mode development ./example/index.js --output ./dist/build.js"
+  },
   "dependencies": {
     "@babel/core": "^7.0.0-beta.40",
     "@babel/plugin-proposal-class-properties": "^7.0.0-beta.40",
@@ -13,7 +16,7 @@
     "@babel/plugin-syntax-dynamic-import": "^7.0.0-beta.40",
     "@babel/plugin-transform-proto-to-assign": "^7.0.0-beta.40",
     "@babel/preset-env": "^7.0.0-beta.40",
-    "autoprefixer": "^7.1.6",
+    "autoprefixer": "^8.1.0",
     "babel-loader": "8.0.0-beta.2",
     "css-loader": "^0.28.7",
     "extract-text-webpack-plugin": "^3.0.1",
@@ -22,9 +25,11 @@
     "less": "^3.0.0-alpha.3",
     "less-loader": "^4.0.5",
     "less-plugin-lists": "^1.1.1",
+    "mini-css-extract-plugin": "^0.2.0",
     "postcss-loader": "^2.0.8",
     "raw-loader": "^0.5.1",
-    "webpack": "^3.7.1",
-    "webpack-bundle-analyzer": "^2.9.1"
+    "webpack": "^4.1.1",
+    "webpack-bundle-analyzer": "^2.9.1",
+    "webpack-cli": "^2.0.12"
   }
 }
