@@ -168,7 +168,7 @@ module.exports = function (entry, output) {
           }
         },
         {
-          test: /\.(glsl|obj)$/,
+          test: /\.(glsl|obj|html)$/,
           use: 'raw-loader'
         }
       ]
