@@ -159,6 +159,10 @@ module.exports = function (entry, output) {
           }
         },
         {
+          test: /\.inline\.svg$/,
+          use: 'svg-inline-loader'
+        },
+        {
           test: /\.(svg|jpg|png|gif|ico)$/,
           use: {
             loader: 'file-loader',
@@ -166,10 +170,6 @@ module.exports = function (entry, output) {
               name: '/assets/[name].[ext]'
             }
           }
-        },
-        {
-          test: /\.inline\.svg$/,
-          use: 'svg-inline-loader'
         },
         {
           test: /\.(glsl|obj|html)$/,
