@@ -172,7 +172,7 @@ module.exports = function (entry, output) {
           use: 'svg-inline-loader'
         },
         {
-          test: /\.(glsl|obj)$/,
+          test: /\.(glsl|obj|html)$/,
           use: 'raw-loader'
         }
       ]
