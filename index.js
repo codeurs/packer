@@ -29,7 +29,8 @@ module.exports = function (entry, output) {
   const defaults = {
     output: {
       path: path.resolve(outPath),
-      filename: out
+      filename: out,
+      publicPath: '/'
     },
     entry: path.resolve(entry)
   }
@@ -154,20 +155,16 @@ module.exports = function (entry, output) {
           use: {
             loader: 'file-loader',
             options: {
-              name: '/fonts/[name].[ext]'
+              name: 'assets/fonts/[name].[ext]'
             }
           }
-        },
-        {
-          test: /\.inline\.svg$/,
-          use: 'svg-inline-loader'
         },
         {
           test: /\.(svg|jpg|png|gif|ico)$/,
           use: {
             loader: 'file-loader',
             options: {
-              name: '/assets/[name].[ext]'
+              name: 'assets/images/[name].[ext]'
             }
           }
         },
