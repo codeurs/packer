@@ -19,7 +19,7 @@
     "extract-text-webpack-plugin": "^3.0.1",
     "file-loader": "^1.1.5",
     "iconfont-webpack-plugin": "^1.1.0",
-    "less": "^3.0.0-alpha.3",
+    "less": "^3.0.1",
     "less-loader": "^4.0.5",
     "less-plugin-lists": "^1.1.1",
     "postcss-loader": "^2.0.8",
