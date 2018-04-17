@@ -126,6 +126,7 @@ module.exports = function (entry, output) {
               {
                 loader: 'css-loader',
                 options: {
+                  minimize: IS_PROD,
                   sourceMap: !IS_PROD
                 }
               },
