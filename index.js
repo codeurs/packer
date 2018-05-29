@@ -112,7 +112,7 @@ module.exports = function (entry, output) {
               plugins: [
                 '@babel/plugin-syntax-dynamic-import',
                 '@babel/plugin-transform-proto-to-assign',
-                '@babel/plugin-proposal-decorators',
+                ['@babel/plugin-proposal-decorators', {legacy: true}],
                 ['@babel/plugin-proposal-class-properties', {loose: true}],
                 '@babel/plugin-proposal-object-rest-spread',
               ]
