@@ -44,6 +44,8 @@ module.exports = function (entry, output) {
   }
 
   function config(env) {
+    if (process.env.NODE_ENV)
+      env = defaults.mode = process.env.NODE_ENV
     console.log(`Compiling for ${env}`)
     const plugins = Object.values(plugin)
     if (process.env.ANALYZE)
