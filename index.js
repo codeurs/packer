@@ -7,7 +7,6 @@ const LessPluginLists = require('less-plugin-lists')
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 
-const IS_PROD = process.env.NODE_ENV === 'production'
 const strip = (str, end) => str.substr(0, str.length-end.length)
 
 module.exports = function (entry, output) {
@@ -20,8 +19,7 @@ module.exports = function (entry, output) {
   const plugin = {
     less: new MiniCssExtractPlugin({
       filename: path.parse(output).name + '.css'
-    }),
-    env: new webpack.EnvironmentPlugin(['NODE_ENV'])
+    })
   }
 
   const defaults = {
@@ -70,115 +68,122 @@ module.exports = function (entry, output) {
     }
   }
 
-  return {
-    ...config(process.env.NODE_ENV),
-    stats: {
-      colors: true,
-      hash: false,
-      version: false,
-      timings: true,
-      assets: false,
-      chunks: false,
-      modules: true,
-      reasons: false,
-      children: false,
-      source: false,
-      errors: true,
-      errorDetails: true,
-      warnings: true,
-      publicPath: false
-    },
-    resolve: {
-      symlinks: false,
-      modules: [srcPath, 'node_modules']
-    },
-    module: {
-      rules: [
-        {
-          test: /\.js$/,
-          include,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              cacheDirectory: true,
-              presets: [
-                ['@babel/preset-env', {
-                  modules: false,
-                  loose: true,
-                  targets: {
-                    browsers: [
-                        'last 2 versions',
-                        'ie >= 9', 
-                        'safari >= 7'
-                      ]
-                    }
-                }]
-              ],
-              plugins: [
-                '@babel/plugin-syntax-dynamic-import',
-                '@babel/plugin-transform-proto-to-assign',
-                ['@babel/plugin-proposal-decorators', {legacy: true}],
-                ['@babel/plugin-proposal-class-properties', {loose: true}],
-                '@babel/plugin-proposal-object-rest-spread',
-              ]
-            }
-          }
-        },
-        {
-          test: /\.(css|less)$/,
-          include,
-          use: [
-            MiniCssExtractPlugin.loader,
-            {
-              loader: 'css-loader',
+  return (env, argv) => {
+    const isProd = argv.mode === 'production'
+    const target = config(argv.mode)
+    return {
+      ...target, 
+      plugins: [new webpack.DefinePlugin({
+        NODE_ENV: argv.mode
+      }), ...target.plugins],
+      stats: {
+        colors: true,
+        hash: false,
+        version: false,
+        timings: true,
+        assets: false,
+        chunks: false,
+        modules: true,
+        reasons: false,
+        children: false,
+        source: false,
+        errors: true,
+        errorDetails: true,
+        warnings: true,
+        publicPath: false
+      },
+      resolve: {
+        symlinks: false,
+        modules: [srcPath, 'node_modules']
+      },
+      module: {
+        rules: [
+          {
+            test: /\.js$/,
+            include,
+            use: {
+              loader: 'babel-loader',
               options: {
-                minimize: IS_PROD,
-                sourceMap: !IS_PROD
-              }
-            },
-            {
-              loader: 'postcss-loader',
-              options: {
-                sourceMap: !IS_PROD,
-                plugins: loader => [
-                  autoprefixer({grid: true}), 
-                  new IconfontWebpackPlugin(loader)
+                cacheDirectory: true,
+                presets: [
+                  ['@babel/preset-env', {
+                    modules: false,
+                    loose: true,
+                    targets: {
+                      browsers: [
+                          'last 2 versions',
+                          'ie >= 9', 
+                          'safari >= 7'
+                        ]
+                      }
+                  }]
+                ],
+                plugins: [
+                  '@babel/plugin-syntax-dynamic-import',
+                  '@babel/plugin-transform-proto-to-assign',
+                  ['@babel/plugin-proposal-decorators', {legacy: true}],
+                  ['@babel/plugin-proposal-class-properties', {loose: true}],
+                  '@babel/plugin-proposal-object-rest-spread',
                 ]
               }
-            },
-            {
-              loader: 'less-loader',
+            }
+          },
+          {
+            test: /\.(css|less)$/,
+            include,
+            use: [
+              MiniCssExtractPlugin.loader,
+              {
+                loader: 'css-loader',
+                options: {
+                  minimize: isProd,
+                  sourceMap: !isProd
+                }
+              },
+              {
+                loader: 'postcss-loader',
+                options: {
+                  sourceMap: !isProd,
+                  plugins: loader => [
+                    autoprefixer({grid: true}), 
+                    new IconfontWebpackPlugin(loader)
+                  ]
+                }
+              },
+              {
+                loader: 'less-loader',
+                options: {
+                  sourceMap: !isProd,
+                  paths: [srcPath, 'node_modules'],
+                  plugins: [new LessPluginLists()]
+                }
+              }
+            ]
+          },
+          {
+            test: /\.(eot|ttf|woff|woff2)$/,
+            use: {
+              loader: 'file-loader',
               options: {
-                sourceMap: !IS_PROD,
-                paths: [srcPath, 'node_modules'],
-                plugins: [new LessPluginLists()]
+                name: 'assets/fonts/[name].[ext]'
               }
             }
-          ]
-        },
-        {
-          test: /\.(eot|ttf|woff|woff2)$/,
-          use: {
-            loader: 'file-loader',
-            options: {
-              name: 'assets/fonts/[name].[ext]'
+          },
+          {
+            test: /\.(svg|jpg|png|gif|ico)$/,
+            use: {
+              loader: 'file-loader',
+              options: {
+                name: 'assets/images/[name].[ext]'
+              }
             }
+          },
+          {
+            test: /\.(glsl|obj|html)$/,
+            use: 'raw-loader'
           }
-        },
-        {
-          test: /\.(svg|jpg|png|gif|ico)$/,
-          use: {
-            loader: 'file-loader',
-            options: {
-              name: 'assets/images/[name].[ext]'
-            }
-          }
-        },
-        {
-          test: /\.(glsl|obj|html)$/,
-          use: 'raw-loader'
-        }
-      ]
+        ]
+      }
     }
   }
 }
