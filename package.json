@@ -15,7 +15,7 @@
     "@babel/plugin-transform-proto-to-assign": "^7.0.0-beta.49",
     "@babel/preset-env": "^7.0.0-beta.49",
     "autoprefixer": "^8.6.0",
-    "babel-loader": "^7.1.4",
+    "babel-loader": "^8.0.0-beta",
     "css-loader": "^0.28.11",
     "file-loader": "^1.1.11",
     "iconfont-webpack-plugin": "^2.0.0",
