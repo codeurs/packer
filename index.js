@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const webpack = require('webpack')
 const autoprefixer = require('autoprefixer')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const LessPluginLists = require('less-plugin-lists')
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
@@ -18,15 +18,25 @@ module.exports = function (entry, output) {
   const include = [path.resolve(srcPath), path.resolve('node_modules/@codeurs')]
 
   const plugin = {
-    ignore: new webpack.IgnorePlugin(/unicode/),
-    less: new ExtractTextPlugin({
-      filename: path.parse(output).name + '.css',
-      allChunks: true
+    less: new MiniCssExtractPlugin({
+      filename: path.parse(output).name + '.css'
     }),
     env: new webpack.EnvironmentPlugin(['NODE_ENV'])
   }
 
   const defaults = {
+    optimization: {
+      splitChunks: {
+        cacheGroups: {
+          styles: {
+            name: 'styles',
+            test: /\.(css|less)$/,
+            chunks: 'all',
+            enforce: true
+          }
+        }
+      }
+    },
     output: {
       path: path.resolve(outPath),
       filename: out,
@@ -55,12 +65,7 @@ module.exports = function (entry, output) {
       case 'production':
         return {
           ...defaults,
-          plugins: [
-            ...plugins,
-            new webpack.optimize.UglifyJsPlugin({
-              compress: {warnings: false}
-            })
-          ]
+          plugins
         }
     }
   }
@@ -122,35 +127,34 @@ module.exports = function (entry, output) {
         {
           test: /\.(css|less)$/,
           include,
-          use: plugin.less.extract({
-            use: [
-              {
-                loader: 'css-loader',
-                options: {
-                  minimize: IS_PROD,
-                  sourceMap: !IS_PROD
-                }
-              },
-              {
-                loader: 'postcss-loader',
-                options: {
-                  sourceMap: !IS_PROD,
-                  plugins: loader => [
-                    autoprefixer({grid: true}), 
-                    new IconfontWebpackPlugin(loader)
-                  ]
-                }
-              },
-              {
-                loader: 'less-loader',
-                options: {
-                  sourceMap: !IS_PROD,
-                  paths: [srcPath, 'node_modules'],
-                  plugins: [new LessPluginLists()]
-                }
+          use: [
+            MiniCssExtractPlugin.loader,
+            {
+              loader: 'css-loader',
+              options: {
+                minimize: IS_PROD,
+                sourceMap: !IS_PROD
               }
-            ]
-          })
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                sourceMap: !IS_PROD,
+                plugins: loader => [
+                  autoprefixer({grid: true}), 
+                  new IconfontWebpackPlugin(loader)
+                ]
+              }
+            },
+            {
+              loader: 'less-loader',
+              options: {
+                sourceMap: !IS_PROD,
+                paths: [srcPath, 'node_modules'],
+                plugins: [new LessPluginLists()]
+              }
+            }
+          ]
         },
         {
           test: /\.(eot|ttf|woff|woff2)$/,
