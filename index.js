@@ -2,39 +2,28 @@ const fs = require('fs')
 const path = require('path')
 const webpack = require('webpack')
 const autoprefixer = require('autoprefixer')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const LessPluginLists = require('less-plugin-lists')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 
 const strip = (str, end) => str.substr(0, str.length-end.length)
 
-module.exports = function (entry, output) {
+module.exports = function (entry, output, options = {}) {
   const src = path.basename(entry)
   const srcPath = strip(entry, src)
   const out = path.basename(output)
   const outPath = strip(output, out)
-  const include = [path.resolve(srcPath), path.resolve('node_modules/@codeurs')]
+  const includes = options.include ? options.include : []
+  const include = [...includes, path.resolve(srcPath), path.resolve('node_modules/@codeurs')]
 
   const plugin = {
-    less: new MiniCssExtractPlugin({
-      filename: path.parse(output).name + '.css'
+    less: new ExtractTextPlugin({
+      filename: path.parse(output).name + '.css',
+      allChunks: true
     })
   }
 
   const defaults = {
-    optimization: {
-      splitChunks: {
-        cacheGroups: {
-          styles: {
-            name: 'styles',
-            test: /\.(css|less)$/,
-            chunks: 'all',
-            enforce: true
-          }
-        }
-      }
-    },
     output: {
       path: path.resolve(outPath),
       filename: out,
@@ -43,10 +32,9 @@ module.exports = function (entry, output) {
     entry: path.resolve(entry)
   }
 
-  function config(env) {
-    if (process.env.NODE_ENV)
-      env = defaults.mode = process.env.NODE_ENV
-    console.log(`Compiling for ${env}`)
+  function config(mode) {
+    defaults.mode = mode
+    console.log(`Compiling for ${mode}`)
     const plugins = Object.values(plugin)
     if (process.env.ANALYZE)
       plugins.push(
@@ -55,7 +43,7 @@ module.exports = function (entry, output) {
           analyzerPort: process.env.ANALYZE
         })
       )
-    switch (env) {
+    switch (mode) {
       case 'development':
         return {
           ...defaults,
@@ -71,12 +59,13 @@ module.exports = function (entry, output) {
   }
 
   return (env, argv) => {
-    const isProd = argv.mode === 'production'
-    const target = config(argv.mode)
+    const mode = argv.mode || process.env.NODE_ENV
+    const isProd = mode === 'production'
+    const target = config(mode)
     return {
       ...target, 
       plugins: [new webpack.DefinePlugin({
-        NODE_ENV: argv.mode
+        'process.env.NODE_ENV': JSON.stringify(mode)
       }), ...target.plugins],
       stats: {
         colors: true,
@@ -96,10 +85,16 @@ module.exports = function (entry, output) {
       },
       resolve: {
         symlinks: false,
+        extensions: ['.js', '.ts', '.less', '.css'],
         modules: [srcPath, 'node_modules']
       },
       module: {
         rules: [
+          {
+            test: /\.ts$/,
+            include,
+            use: 'ts-loader'
+          },
           {
             test: /\.js$/,
             include,
@@ -133,37 +128,38 @@ module.exports = function (entry, output) {
           {
             test: /\.(css|less)$/,
             include,
-            use: [
-              MiniCssExtractPlugin.loader,
-              {
-                loader: 'css-loader',
-                options: {
-                  minimize: isProd,
-                  sourceMap: !isProd
+            use: plugin.less.extract({
+              use: [
+                {
+                  loader: 'css-loader',
+                  options: {
+                    minimize: isProd,
+                    sourceMap: !isProd
+                  }
+                },
+                {
+                  loader: 'postcss-loader',
+                  options: {
+                    sourceMap: !isProd,
+                    plugins: loader => [
+                      autoprefixer({grid: true}), 
+                      new IconfontWebpackPlugin(loader)
+                    ]
+                  }
+                },
+                {
+                  loader: 'less-loader',
+                  options: {
+                    sourceMap: !isProd,
+                    paths: [srcPath, 'node_modules']
+                  }
                 }
-              },
-              {
-                loader: 'postcss-loader',
-                options: {
-                  sourceMap: !isProd,
-                  plugins: loader => [
-                    autoprefixer({grid: true}), 
-                    new IconfontWebpackPlugin(loader)
-                  ]
-                }
-              },
-              {
-                loader: 'less-loader',
-                options: {
-                  sourceMap: !isProd,
-                  paths: [srcPath, 'node_modules'],
-                  plugins: [new LessPluginLists()]
-                }
-              }
-            ]
+              ]
+            })
           },
           {
             test: /\.(eot|ttf|woff|woff2)$/,
+            include,
             use: {
               loader: 'file-loader',
               options: {
@@ -173,6 +169,7 @@ module.exports = function (entry, output) {
           },
           {
             test: /\.(svg|jpg|png|gif|ico)$/,
+            include,
             use: {
               loader: 'file-loader',
               options: {
@@ -182,6 +179,7 @@ module.exports = function (entry, output) {
           },
           {
             test: /\.(glsl|obj|html)$/,
+            include,
             use: 'raw-loader'
           }
         ]
