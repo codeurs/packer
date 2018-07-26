@@ -4795,9 +4795,9 @@ webpack-cli@^3.0.1:
     v8-compile-cache "^2.0.0"
     yargs "^11.1.0"
 
-webpack-fix-default-import-plugin@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/webpack-fix-default-import-plugin/-/webpack-fix-default-import-plugin-1.0.3.tgz#882b8e4d1aa93c48cb8fdaf846fc79d86f82f14f"
+webpack-fix-default-import-plugin@sormy/webpack-fix-default-import-plugin#30401a2:
+  version "2.0.0"
+  resolved "https://codeload.github.com/sormy/webpack-fix-default-import-plugin/tar.gz/30401a279d703391b0ad6e4513da25a70891584d"
 
 webpack-sources@^1.0.1, webpack-sources@^1.1.0:
   version "1.1.0"
