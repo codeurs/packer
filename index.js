@@ -5,6 +5,7 @@ const autoprefixer = require('autoprefixer')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
+const FixDefaultImportPlugin = require('webpack-fix-default-import-plugin')
 
 const strip = (str, end) => str.substr(0, str.length-end.length)
 
@@ -20,7 +21,8 @@ module.exports = function (entry, output, options = {}) {
     less: new ExtractTextPlugin({
       filename: path.parse(output).name + '.css',
       allChunks: true
-    })
+    }),
+    fixDefault: new FixDefaultImportPlugin()
   }
 
   const defaults = {
