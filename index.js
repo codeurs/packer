@@ -6,6 +6,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const LessPluginLists = require('less-plugin-lists')
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
+const cssNano = require('cssnano')
 
 const IS_PROD = process.env.NODE_ENV === 'production'
 const strip = (str, end) => str.substr(0, str.length-end.length)
@@ -137,7 +138,8 @@ module.exports = function (entry, output) {
                   sourceMap: !IS_PROD,
                   plugins: loader => [
                     autoprefixer({grid: true}), 
-                    new IconfontWebpackPlugin(loader)
+                    new IconfontWebpackPlugin(loader),
+                    cssNano({preset: 'default'})
                   ]
                 }
               },
