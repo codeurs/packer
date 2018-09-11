@@ -138,9 +138,8 @@ module.exports = function (entry, output) {
                   sourceMap: !IS_PROD,
                   plugins: loader => [
                     autoprefixer({grid: true}), 
-                    new IconfontWebpackPlugin(loader),
-                    cssNano({preset: 'default'})
-                  ]
+                    new IconfontWebpackPlugin(loader)
+                  ].concat(IS_PROD ? cssNano({preset: 'default'}) : [])
                 }
               },
               {
