@@ -5,7 +5,7 @@ const autoprefixer = require('autoprefixer')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
-const FixDefaultImportPlugin = require('webpack-fix-default-import-plugin')
+const cssNano = require('cssnano')
 
 const strip = (str, end) => str.substr(0, str.length-end.length)
 
@@ -21,8 +21,7 @@ module.exports = function (entry, output, options = {}) {
     less: new ExtractTextPlugin({
       filename: path.parse(output).name + '.css',
       allChunks: true
-    }),
-    fixDefault: new FixDefaultImportPlugin()
+    })
   }
 
   const defaults = {
@@ -144,9 +143,9 @@ module.exports = function (entry, output, options = {}) {
                   options: {
                     sourceMap: !isProd,
                     plugins: loader => [
-                      autoprefixer({grid: true}), 
+                      autoprefixer({grid: true}),
                       new IconfontWebpackPlugin(loader)
-                    ]
+                    ].concat(IS_PROD ? cssNano({preset: 'default'}) : [])
                   }
                 },
                 {
