@@ -67,6 +67,8 @@ module.exports = function (entry, output, options = {}) {
       ...target, 
       plugins: [new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(mode)
+      }), new webpack.ProvidePlugin({
+        m: 'mithril'
       }), ...target.plugins],
       stats: {
         colors: true,
@@ -122,6 +124,9 @@ module.exports = function (entry, output, options = {}) {
                   ['@babel/plugin-proposal-decorators', {legacy: true}],
                   ['@babel/plugin-proposal-class-properties', {loose: true}],
                   '@babel/plugin-proposal-object-rest-spread',
+                  ["@babel/plugin-transform-react-jsx", {
+                    "pragma": "m"
+                  }]
                 ]
               }
             }
