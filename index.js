@@ -96,11 +96,13 @@ module.exports = function (entry, output, options = {}) {
           {
             test: /\.(ts|tsx)$/,
             include,
-            use: 'ts-loader'
+            use: 'ts-loader',
+            sideEffects: false
           },
           {
             test: /\.js$/,
             include,
+            sideEffects: false,
             use: {
               loader: 'babel-loader',
               options: {
@@ -133,6 +135,7 @@ module.exports = function (entry, output, options = {}) {
           {
             test: /\.(css|less)$/,
             include,
+            sideEffects: true,
             use: plugin.less.extract({
               use: [
                 {
