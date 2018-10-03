@@ -15,7 +15,7 @@ module.exports = function (entry, output, options = {}) {
   const out = path.basename(output)
   const outPath = strip(output, out)
   const includes = options.include ? options.include : []
-  const include = [...includes, path.resolve(srcPath)]
+  const include = [...includes, path.resolve(srcPath), path.resolve('node_modules/@codeurs')]
 
   const plugin = {
     less: new ExtractTextPlugin({
