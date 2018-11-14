@@ -7,15 +7,19 @@ const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 const cssNano = require('cssnano')
 
-const strip = (str, end) => str.substr(0, str.length-end.length)
+const strip = (str, end) => str.substr(0, str.length - end.length)
 
-module.exports = function (entry, output, options = {}) {
+module.exports = function(entry, output, options = {}) {
   const src = path.basename(entry)
   const srcPath = strip(entry, src)
   const out = path.basename(output)
   const outPath = strip(output, out)
   const includes = options.include ? options.include : []
-  const include = [...includes, path.resolve(srcPath), path.resolve('node_modules/@codeurs')]
+  const include = [
+    ...includes,
+    path.resolve(srcPath),
+    path.resolve('node_modules/@codeurs')
+  ]
 
   const plugin = {
     less: new ExtractTextPlugin({
@@ -64,12 +68,21 @@ module.exports = function (entry, output, options = {}) {
     const isProd = mode === 'production'
     const target = config(mode)
     return {
-      ...target, 
-      plugins: [new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(mode)
-      }), new webpack.ProvidePlugin({
-        m: 'mithril'
-      }), ...target.plugins],
+      ...target,
+      plugins: [
+        new webpack.DefinePlugin({
+          'process.env.NODE_ENV': JSON.stringify(mode)
+        }),
+        new webpack.EnvironmentPlugin([
+          'DEBUG',
+          'SENTRY_CONNECTION',
+          'PROJECT_RELEASE'
+        ]),
+        new webpack.ProvidePlugin({
+          m: 'mithril'
+        }),
+        ...target.plugins
+      ],
       stats: {
         colors: true,
         hash: false,
@@ -108,17 +121,16 @@ module.exports = function (entry, output, options = {}) {
               options: {
                 cacheDirectory: true,
                 presets: [
-                  ['@babel/preset-env', {
-                    modules: false,
-                    loose: true,
-                    targets: {
-                      browsers: [
-                          'last 2 versions',
-                          'ie >= 9', 
-                          'safari >= 7'
-                        ]
+                  [
+                    '@babel/preset-env',
+                    {
+                      modules: false,
+                      loose: true,
+                      targets: {
+                        browsers: ['last 2 versions', 'ie >= 9', 'safari >= 7']
                       }
-                  }]
+                    }
+                  ]
                 ],
                 plugins: [
                   '@babel/plugin-syntax-dynamic-import',
@@ -149,10 +161,11 @@ module.exports = function (entry, output, options = {}) {
                   loader: 'postcss-loader',
                   options: {
                     sourceMap: !isProd,
-                    plugins: loader => [
-                      autoprefixer({grid: true}),
-                      new IconfontWebpackPlugin(loader)
-                    ].concat(isProd ? cssNano({preset: 'default'}) : [])
+                    plugins: loader =>
+                      [
+                        autoprefixer({grid: true}),
+                        new IconfontWebpackPlugin(loader)
+                      ].concat(isProd ? cssNano({preset: 'default'}) : [])
                   }
                 },
                 {
