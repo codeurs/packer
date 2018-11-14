@@ -73,11 +73,11 @@ module.exports = function(entry, output, options = {}) {
         new webpack.DefinePlugin({
           'process.env.NODE_ENV': JSON.stringify(mode)
         }),
-        new webpack.EnvironmentPlugin([
-          'DEBUG',
-          'SENTRY_CONNECTION',
-          'PROJECT_RELEASE'
-        ]),
+        new webpack.EnvironmentPlugin({
+          DEBUG: 'false',
+          SENTRY_CONNECTION: '',
+          PROJECT_RELEASE: ''
+        }),
         new webpack.ProvidePlugin({
           m: 'mithril'
         }),
