@@ -1,72 +1,58 @@
-const fs = require('fs')
+const transpilers = require('./transpilers')
 const path = require('path')
 const webpack = require('webpack')
+const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 const autoprefixer = require('autoprefixer')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
-const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 const cssNano = require('cssnano')
 
 const strip = (str, end) => str.substr(0, str.length - end.length)
+
+const config = context => {
+  const {mode, entry, out, outPath} = context
+  const plugins = transpilers.slice()
+  if (process.env.ANALYZE)
+    plugins.push(
+      new BundleAnalyzerPlugin({
+        analyzerHost: '0.0.0.0',
+        analyzerPort: process.env.ANALYZE
+      })
+    )
+  return {
+    devtool: mode !== 'production' && '#inline-source-map',
+    output: {
+      path: path.resolve(outPath),
+      filename: out,
+      publicPath: '/'
+    },
+    entry: path.resolve(entry),
+    mode,
+    plugins
+  }
+}
 
 module.exports = function(entry, output, options = {}) {
   const src = path.basename(entry)
   const srcPath = strip(entry, src)
   const out = path.basename(output)
   const outPath = strip(output, out)
-  const includes = options.include ? options.include : []
   const include = [
-    ...includes,
+    ...(options.include ? options.include : []),
     path.resolve(srcPath),
     path.resolve('node_modules/@codeurs')
   ]
-
-  const plugin = {
-    less: new ExtractTextPlugin({
-      filename: path.parse(output).name + '.css',
-      allChunks: true
-    })
-  }
-
-  const defaults = {
-    output: {
-      path: path.resolve(outPath),
-      filename: out,
-      publicPath: '/'
-    },
-    entry: path.resolve(entry)
-  }
-
-  function config(mode) {
-    defaults.mode = mode
-    console.log(`Compiling for ${mode}`)
-    const plugins = Object.values(plugin)
-    if (process.env.ANALYZE)
-      plugins.push(
-        new BundleAnalyzerPlugin({
-          analyzerHost: '0.0.0.0',
-          analyzerPort: process.env.ANALYZE
-        })
-      )
-    switch (mode) {
-      case 'development':
-        return {
-          ...defaults,
-          devtool: '#inline-source-map',
-          plugins
-        }
-      case 'production':
-        return {
-          ...defaults,
-          plugins
-        }
-    }
-  }
+  const context = {entry, output, src, srcPath, out, outPath, include}
 
   return (env, argv) => {
     const mode = argv.mode || process.env.NODE_ENV
-    const isProd = mode === 'production'
-    const target = config(mode)
+    console.log(`Compiling for ${mode}`)
+    const isProd = mode == 'production'
+    const target = config({mode, ...context})
+    const less = new ExtractTextPlugin({
+      filename: path.parse(output).name + '.css',
+      allChunks: true
+    })
     return {
       ...target,
       plugins: [
@@ -81,7 +67,8 @@ module.exports = function(entry, output, options = {}) {
         new webpack.ProvidePlugin({
           m: 'mithril'
         }),
-        ...target.plugins
+        ...target.plugins,
+        less
       ],
       stats: {
         colors: true,
@@ -109,46 +96,19 @@ module.exports = function(entry, output, options = {}) {
           {
             test: /\.(ts|tsx)$/,
             include,
-            use: 'ts-loader',
+            use: 'happypack/loader?id=ts',
             sideEffects: false
           },
           {
             test: /\.js$/,
             include,
-            sideEffects: false,
-            use: {
-              loader: 'babel-loader',
-              options: {
-                cacheDirectory: true,
-                presets: [
-                  [
-                    '@babel/preset-env',
-                    {
-                      modules: false,
-                      loose: true,
-                      targets: {
-                        browsers: ['last 2 versions', 'ie >= 9', 'safari >= 7']
-                      }
-                    }
-                  ]
-                ],
-                plugins: [
-                  '@babel/plugin-syntax-dynamic-import',
-                  '@babel/plugin-syntax-jsx',
-                  '@babel/plugin-transform-proto-to-assign',
-                  ['@babel/plugin-proposal-decorators', {legacy: true}],
-                  ['@babel/plugin-proposal-class-properties', {loose: true}],
-                  '@babel/plugin-proposal-object-rest-spread',
-                  ['@babel/plugin-transform-react-jsx', {pragma: 'm'}]
-                ]
-              }
-            }
+            use: 'happypack/loader?id=babel',
+            sideEffects: false
           },
           {
             test: /\.(css|less)$/,
             include,
-            sideEffects: true,
-            use: plugin.less.extract({
+            use: less.extract({
               use: [
                 {
                   loader: 'css-loader',
@@ -176,7 +136,8 @@ module.exports = function(entry, output, options = {}) {
                   }
                 }
               ]
-            })
+            }),
+            sideEffects: true
           },
           {
             test: /\.(eot|ttf|woff|woff2)$/,
