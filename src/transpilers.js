@@ -13,6 +13,7 @@ module.exports = [
     verbose: false,
     threads: 4,
     loaders: [
+      babelLoader,
       {
         loader: 'ts-loader',
         options: {happyPackMode: true}
