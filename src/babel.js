@@ -19,6 +19,7 @@ module.exports = {
     ['@babel/plugin-proposal-decorators', {legacy: true}],
     ['@babel/plugin-proposal-class-properties', {loose: true}],
     '@babel/plugin-proposal-object-rest-spread',
-    ['@babel/plugin-transform-react-jsx', {pragma: 'm'}]
+    ['@babel/plugin-transform-react-jsx', {pragma: 'm'}],
+    '@babel/plugin-transform-runtime'
   ]
 }
