@@ -88,7 +88,7 @@ module.exports = function(entry, output, options = {}) {
       },
       resolve: {
         symlinks: false,
-        extensions: ['.js', '.ts', '.tsx', '.less', '.css'],
+        extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.css'],
         modules: [srcPath, 'node_modules']
       },
       module: {
@@ -105,6 +105,10 @@ module.exports = function(entry, output, options = {}) {
             use: 'happypack/loader?id=babel',
             sideEffects: false
           },
+					{
+						test: /\.mjs$/,
+						type: 'javascript/auto'
+					},
           {
             test: /\.(css|less)$/,
             include,
