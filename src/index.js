@@ -105,22 +105,26 @@ module.exports = function(entry, output, options = {}) {
             use: 'happypack/loader?id=babel',
             sideEffects: false
           },
-					{
-						test: /\.mjs$/,
-						type: 'javascript/auto'
-					},
+          {
+            test: /\.mjs$/,
+            type: 'javascript/auto'
+          },
+          {
+            test: /\.font\.js$/,
+            use: less.extract({
+              use: [
+                'css-loader',
+                'webfonts-loader'
+              ]
+            }),
+            sideEffects: true
+          },
           {
             test: /\.(css|less)$/,
             include,
             use: less.extract({
               use: [
-                {
-                  loader: 'css-loader',
-                  options: {
-                    minimize: isProd,
-                    sourceMap: !isProd
-                  }
-                },
+                'css-loader',
                 {
                   loader: 'postcss-loader',
                   options: {
