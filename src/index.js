@@ -158,7 +158,7 @@ module.exports = function(entry, output, options = {}) {
             }
           },
           {
-            test: /\.(svg|jpg|png|gif|ico)$/,
+            test: /\.(svg|jpg|png|gif|ico|webp|mp4|webm)$/,
             include,
             use: {
               loader: 'file-loader',
