@@ -158,12 +158,23 @@ module.exports = function(entry, output, options = {}) {
             }
           },
           {
-            test: /\.(svg|jpg|png|gif|ico|webp|mp4|webm)$/,
+            test: /\.(svg|jpg|png|gif)$/,
+            include,
+            use: {
+              loader: 'sizeof-loader',
+              options: {
+                limit: 2048,
+                name: 'assets/images/[name].[ext]'
+              }
+            }
+          },
+          {
+            test: /\.(ico|webp|mp4|webm)$/,
             include,
             use: {
               loader: 'file-loader',
               options: {
-                name: 'assets/images/[name].[ext]'
+                name: 'assets/data/[name].[ext]'
               }
             }
           },
