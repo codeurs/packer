@@ -122,7 +122,12 @@ module.exports = function(entry, output, options = {}) {
             include,
             use: less.extract({
               use: [
-                'css-loader',
+                {
+                  loader: 'css-loader',
+                  options: {
+                    sourceMap: !isProd
+                  }
+                },
                 {
                   loader: 'postcss-loader',
                   options: {
