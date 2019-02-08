@@ -31,6 +31,7 @@
     "less": "^3.8.1",
     "less-loader": "^4.1.0",
     "postcss-loader": "^2.1.5",
+    "postcss-pxtorem": "^4.0.1",
     "raw-loader": "^0.5.1",
     "sizeof-loader": "^1.1.1",
     "ts-loader": "^5.3.1",

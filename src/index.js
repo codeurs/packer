@@ -6,6 +6,7 @@ const autoprefixer = require('autoprefixer')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
 const cssNano = require('cssnano')
+const pxtorem = require('postcss-pxtorem')
 
 const strip = (str, end) => str.substr(0, str.length - end.length)
 
@@ -112,10 +113,7 @@ module.exports = function(entry, output, options = {}) {
           {
             test: /\.font\.js$/,
             use: less.extract({
-              use: [
-                'css-loader',
-                'webfonts-loader'
-              ]
+              use: ['css-loader', 'webfonts-loader']
             }),
             sideEffects: true
           },
@@ -130,10 +128,20 @@ module.exports = function(entry, output, options = {}) {
                   options: {
                     sourceMap: !isProd,
                     plugins: loader =>
-                      [
-                        autoprefixer({grid: true}),
-                        new IconfontWebpackPlugin(loader)
-                      ].concat(isProd ? cssNano({preset: 'default'}) : [])
+                      []
+                        .concat(
+                          options.pxToRem
+                            ? pxtorem({
+                                propList: ['*'],
+                                minPixelValue: 0
+                              })
+                            : []
+                        )
+                        .concat([
+                          autoprefixer({grid: true}),
+                          new IconfontWebpackPlugin(loader)
+                        ])
+                        .concat(isProd ? cssNano({preset: 'default'}) : [])
                   }
                 },
                 {
