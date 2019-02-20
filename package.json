@@ -1,6 +1,6 @@
 {
   "name": "@codeurs/packer",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Our webpack config",
   "main": "src/index.js",
   "repository": "https://github.com/codeurs/packer",
