@@ -138,7 +138,7 @@ module.exports = function(entry, output, options = {}) {
                           options.pxToRem
                             ? pxtorem({
                                 propList: ['*'],
-                                minPixelValue: 0
+                                minPixelValue: 1
                               })
                             : []
                         )
