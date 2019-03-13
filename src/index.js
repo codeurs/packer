@@ -170,7 +170,8 @@ module.exports = function(entry, output, options = {}) {
 							options: {
 								name: 'assets/fonts/[name].[ext]'
 							}
-						}
+						},
+						sideEffects: true
 					},
 					{
 						test: /\.(svg|jpg|png|gif)$/,
@@ -181,7 +182,8 @@ module.exports = function(entry, output, options = {}) {
 								limit: 2048,
 								name: 'assets/images/[name].[ext]'
 							}
-						}
+						},
+						sideEffects: true
 					},
 					{
 						test: /\.(ico|webp|mp4|webm)$/,
@@ -191,7 +193,8 @@ module.exports = function(entry, output, options = {}) {
 							options: {
 								name: 'assets/data/[name].[ext]'
 							}
-						}
+						},
+						sideEffects: true
 					},
 					{
 						test: /\.(glsl|obj|html)$/,
