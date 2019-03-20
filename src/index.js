@@ -179,7 +179,7 @@ module.exports = function(entry, output, options = {}) {
 						use: {
 							loader: 'sizeof-loader',
 							options: {
-								limit: 2048,
+								useFileLoader: true,
 								name: 'assets/images/[name].[ext]'
 							}
 						},
