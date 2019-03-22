@@ -1,6 +1,7 @@
 const babel = require('./babel')
 const HappyPack = require('happypack')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
+const fs = require('fs')
 
 const babelLoader = {
   loader: 'babel-loader',
@@ -26,5 +27,8 @@ module.exports = [
     threads: 4,
     loaders: [babelLoader]
   }),
-  new ForkTsCheckerWebpackPlugin({checkSyntacticErrors: true})
+  new ForkTsCheckerWebpackPlugin({
+    checkSyntacticErrors: true,
+    tslint: fs.existsSync('tslint.json')
+  })
 ]

@@ -70,6 +70,7 @@ module.exports = function(entry, output, options = {}) {
 				new webpack.EnvironmentPlugin({
 					DEBUG: 'false',
 					SENTRY_CONNECTION: '',
+					SENTRY_DSN: '',
 					PROJECT_RELEASE: ''
 				}),
 				new webpack.ProvidePlugin({
