@@ -4,7 +4,6 @@ const webpack = require('webpack')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 const autoprefixer = require('autoprefixer')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
 const cssNano = require('cssnano')
 const pxtorem = require('postcss-pxtorem')
 
@@ -147,8 +146,7 @@ module.exports = function(entry, output, options = {}) {
 													: []
 											)
 											.concat([
-												autoprefixer({grid: true}),
-												new IconfontWebpackPlugin(loader)
+												autoprefixer({grid: true})
 											])
 											.concat(isProd ? cssNano({preset: 'default'}) : [])
 								}

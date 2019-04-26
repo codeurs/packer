@@ -22,7 +22,6 @@ module.exports = {
 		['@babel/plugin-proposal-class-properties', {loose: true}],
 		'@babel/plugin-proposal-object-rest-spread',
 		['@babel/plugin-transform-react-jsx', {pragma: 'm'}],
-		['@babel/plugin-transform-destructuring', {useBuiltIns: true}],
-		['@babel/plugin-transform-runtime', {corejs: 3}]
+		['@babel/plugin-transform-destructuring']
 	]
 }
