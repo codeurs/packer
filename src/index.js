@@ -3,7 +3,7 @@ const path = require('path')
 const webpack = require('webpack')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 const autoprefixer = require('autoprefixer')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const cssNano = require('cssnano')
 const pxtorem = require('postcss-pxtorem')
 
@@ -51,12 +51,12 @@ module.exports = function(entry, output, options = {}) {
 		const isProd = mode == 'production'
 		const target = config({mode, ...context})
 		const plugins = target.plugins
-		const less = new ExtractTextPlugin({
-			filename: path.parse(output).name + '.css',
-			allChunks: true
+		const less = new MiniCssExtractPlugin({
+			filename: path.parse(output).name + '.css'
 		})
 		const extract = loaders => {
-			if (!devServer) return less.extract({use: loaders})
+			if (!devServer) 
+				return [{loader: MiniCssExtractPlugin.loader}].concat(loaders)
 			return ['style-loader'].concat(loaders)
 		}
 		if (!devServer) plugins.push(less)
