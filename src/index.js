@@ -3,205 +3,211 @@ const path = require('path')
 const webpack = require('webpack')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 const autoprefixer = require('autoprefixer')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const IconfontWebpackPlugin = require('iconfont-webpack-plugin')
 const cssNano = require('cssnano')
 const pxtorem = require('postcss-pxtorem')
+const StylableWebpackPlugin = require('@stylable/webpack-plugin')
 
 const strip = (str, end) => str.substr(0, str.length - end.length)
 
 const config = context => {
-	const {mode, entry, out, outPath} = context
-	const plugins = transpilers.slice()
-	if (process.env.ANALYZE)
-		plugins.push(
-			new BundleAnalyzerPlugin({
-				analyzerHost: '0.0.0.0',
-				analyzerPort: process.env.ANALYZE
-			})
-		)
-	return {
-		devtool: mode !== 'production' && '#inline-source-map',
-		output: {
-			path: path.resolve(outPath),
-			filename: out,
-			publicPath: '/'
-		},
-		entry: path.resolve(entry),
-		mode,
-		plugins
-	}
+  const {mode, entry, out, outPath} = context
+  const plugins = transpilers.slice()
+  if (process.env.ANALYZE)
+    plugins.push(
+      new BundleAnalyzerPlugin({
+        analyzerHost: '0.0.0.0',
+        analyzerPort: process.env.ANALYZE
+      })
+    )
+  return {
+    devtool: mode !== 'production' && '#inline-source-map',
+    output: {
+      path: path.resolve(outPath),
+      filename: out,
+      publicPath: '/'
+    },
+    entry: path.resolve(entry),
+    mode,
+    plugins
+  }
 }
 
-module.exports = function(entry, output, options = {}) {
-	const src = path.basename(entry)
-	const srcPath = strip(entry, src)
-	const out = path.basename(output)
-	const outPath = strip(output, out)
-	const include = [
-		...(options.include ? options.include : []),
-		path.resolve(srcPath),
-		path.resolve('node_modules/@codeurs')
-	]
-	const context = {entry, output, src, srcPath, out, outPath, include}
+const css = ({isProd, pxToRem, srcPath}) => [
+  {
+    loader: 'css-loader',
+    options: {
+      sourceMap: !isProd
+    }
+  },
+  {
+    loader: 'postcss-loader',
+    options: {
+      sourceMap: !isProd,
+      plugins: loader =>
+        []
+          .concat(
+            pxToRem
+              ? pxtorem({
+                  propList: ['*'],
+                  minPixelValue: 2
+                })
+              : []
+          )
+          .concat([
+            autoprefixer({grid: true}),
+            new IconfontWebpackPlugin(loader)
+          ])
+          .concat(isProd ? cssNano({preset: 'default'}) : [])
+    }
+  },
+  {
+    loader: 'less-loader',
+    options: {
+      rewriteUrls: 'local',
+      sourceMap: !isProd,
+      paths: [srcPath, 'node_modules']
+    }
+  }
+]
 
-	return (env, argv) => {
-		const mode = argv.mode || process.env.NODE_ENV
-		const devServer = process.env.DEV_SERVER
-		console.log(`Compiling for ${mode}`)
-		const isProd = mode == 'production'
-		const target = config({mode, ...context})
-		const plugins = target.plugins
-		const less = new MiniCssExtractPlugin({
-			filename: path.parse(output).name + '.css'
-		})
-		const extract = loaders => {
-			if (!devServer) 
-				return [{loader: MiniCssExtractPlugin.loader}].concat(loaders)
-			return ['style-loader'].concat(loaders)
-		}
-		if (!devServer) plugins.push(less)
-		return {
-			...target,
-			plugins: [
-				new webpack.DefinePlugin({
-					'process.env.NODE_ENV': JSON.stringify(mode)
-				}),
-				new webpack.EnvironmentPlugin({
-					DEBUG: 'false',
-					SENTRY_CONNECTION: '',
-					SENTRY_DSN: '',
-					PROJECT_RELEASE: ''
-				}),
-				new webpack.ProvidePlugin({
-					m: 'mithril'
-				}),
-				...plugins
-			],
-			stats: {
-				colors: true,
-				hash: false,
-				version: false,
-				timings: true,
-				assets: false,
-				chunks: false,
-				modules: true,
-				reasons: false,
-				children: false,
-				source: false,
-				errors: true,
-				errorDetails: true,
-				warnings: true,
-				publicPath: false
-			},
-			resolve: {
-				symlinks: false,
-				extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.css'],
-				modules: [srcPath, 'node_modules']
-			},
-			module: {
-				rules: [
-					{
-						test: /\.(ts|tsx)$/,
-						include,
-						use: 'happypack/loader?id=ts',
-						sideEffects: false
-					},
-					{
-						test: /\.js$/,
-						include,
-						use: 'happypack/loader?id=babel',
-						sideEffects: false
-					},
-					{
-						test: /\.mjs$/,
-						type: 'javascript/auto'
-					},
-					{
-						test: /\.font\.js$/,
-						use: extract(['css-loader', 'webfonts-loader']),
-						sideEffects: true
-					},
-					{
-						test: /\.(css|less)$/,
-						include,
-						use: extract([
-							{
-								loader: 'css-loader',
-								options: {
-									sourceMap: !isProd
-								}
-							},
-							{
-								loader: 'postcss-loader',
-								options: {
-									sourceMap: !isProd,
-									plugins: loader =>
-										[]
-											.concat(
-												options.pxToRem
-													? pxtorem({
-															propList: ['*'],
-															minPixelValue: 2
-													  })
-													: []
-											)
-											.concat([
-												autoprefixer({grid: true})
-											])
-											.concat(isProd ? cssNano({preset: 'default'}) : [])
-								}
-							},
-							{
-								loader: 'less-loader',
-								options: {
-									sourceMap: !isProd,
-									paths: [srcPath, 'node_modules']
-								}
-							}
-						]),
-						sideEffects: true
-					},
-					{
-						test: /\.(eot|ttf|woff|woff2)$/,
-						include,
-						use: {
-							loader: 'file-loader',
-							options: {
-								name: 'assets/fonts/[name].[ext]'
-							}
-						},
-						sideEffects: true
-					},
-					{
-						test: /\.(svg|jpg|png|gif)$/,
-						include,
-						use: {
-							loader: 'sizeof-loader',
-							options: {
-								useFileLoader: true,
-								name: 'assets/images/[name].[ext]'
-							}
-						},
-						sideEffects: true
-					},
-					{
-						test: /\.(ico|webp|mp4|webm)$/,
-						include,
-						use: {
-							loader: 'file-loader',
-							options: {
-								name: 'assets/data/[name].[ext]'
-							}
-						},
-						sideEffects: true
-					},
-					{
-						test: /\.(glsl|obj|html)$/,
-						include,
-						use: 'raw-loader'
-					}
-				]
-			}
-		}
-	}
+module.exports = function(entry, output, options = {}) {
+  const src = path.basename(entry)
+  const srcPath = strip(entry, src)
+  const out = path.basename(output)
+  const outPath = strip(output, out)
+  const include = [
+    ...(options.include ? options.include : []),
+    path.resolve(srcPath),
+    path.resolve('node_modules/@codeurs')
+  ]
+  const context = {entry, output, src, srcPath, out, outPath, include}
+
+  return (env, argv) => {
+    const mode = argv.mode || process.env.NODE_ENV
+    const devServer = process.env.DEV_SERVER
+    console.log(`Compiling for ${mode}`)
+    const isProd = mode == 'production'
+    const target = config({mode, ...context})
+    const plugins = target.plugins
+    const less = new ExtractTextPlugin({
+      filename: path.parse(output).name + '.css',
+      allChunks: true
+    })
+    const extract = loaders => {
+      if (!devServer) return less.extract({use: loaders})
+      return ['style-loader'].concat(loaders)
+    }
+    if (!devServer) plugins.push(less)
+    return {
+      ...target,
+      plugins: [
+        new webpack.DefinePlugin({
+          'process.env.NODE_ENV': JSON.stringify(mode)
+        }),
+        new webpack.EnvironmentPlugin({
+          DEBUG: 'false',
+          SENTRY_CONNECTION: '',
+          PROJECT_RELEASE: ''
+        }),
+        new webpack.ProvidePlugin({
+          m: 'mithril'
+        }),
+        new StylableWebpackPlugin(),
+        ...plugins
+      ],
+      stats: {
+        colors: true,
+        hash: false,
+        version: false,
+        timings: true,
+        assets: false,
+        chunks: false,
+        modules: true,
+        reasons: false,
+        children: false,
+        source: false,
+        errors: true,
+        errorDetails: true,
+        warnings: true,
+        publicPath: false
+      },
+      resolve: {
+        symlinks: false,
+        extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.css'],
+        modules: [srcPath, 'node_modules']
+      },
+      module: {
+        rules: [
+          {
+            test: /\.(ts|tsx)$/,
+            include,
+            use: 'happypack/loader?id=ts',
+            sideEffects: false
+          },
+          {
+            test: /\.js$/,
+            include,
+            use: 'happypack/loader?id=babel',
+            sideEffects: false
+          },
+          {
+            test: /\.mjs$/,
+            type: 'javascript/auto'
+          },
+          {
+            test: /\.font\.js$/,
+            use: extract(['css-loader', 'webfonts-loader']),
+            sideEffects: true
+          },
+          {
+            test: /(^((?!\.st).)*\.css$)|\.less$/,
+            include,
+            use: extract(css({...options, isProd, srcPath})),
+            sideEffects: true
+          },
+          {
+            test: /\.(eot|ttf|woff|woff2)$/,
+            include,
+            use: {
+              loader: 'file-loader',
+              options: {
+                name: 'assets/fonts/[name].[ext]'
+              }
+            },
+            sideEffects: true
+          },
+          {
+            test: /\.(svg|jpg|png|gif)$/,
+            include,
+            use: {
+              loader: 'sizeof-loader',
+              options: {
+                limit: 2048,
+                name: 'assets/images/[name].[ext]'
+              }
+            },
+            sideEffects: true
+          },
+          {
+            test: /\.(ico|webp|mp4|webm)$/,
+            include,
+            use: {
+              loader: 'file-loader',
+              options: {
+                name: 'assets/data/[name].[ext]'
+              }
+            },
+            sideEffects: true
+          },
+          {
+            test: /\.(glsl|obj|html)$/,
+            include,
+            use: 'raw-loader'
+          }
+        ]
+      }
+    }
+  }
 }

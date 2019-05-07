@@ -17,6 +17,7 @@
     "@babel/plugin-transform-proto-to-assign": "^7.2.0",
     "@babel/plugin-transform-react-jsx": "^7.2.0",
     "@babel/preset-env": "^7.2.3",
+    "@stylable/webpack-plugin": "^1.1.4",
     "autoprefixer": "^9.3.1",
     "babel-loader": "^8.0.4",
     "core-js": "^3.0.1",
