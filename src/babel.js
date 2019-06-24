@@ -1,4 +1,4 @@
-module.exports = {
+module.exports = options => ({
 	cacheDirectory: true,
 	presets: [
 		[
@@ -22,6 +22,7 @@ module.exports = {
 		['@babel/plugin-proposal-class-properties', {loose: true}],
 		'@babel/plugin-proposal-object-rest-spread',
 		['@babel/plugin-transform-react-jsx', {pragma: 'm'}],
-		['@babel/plugin-transform-destructuring']
+		['@babel/plugin-transform-destructuring'],
+		...(options.plugins || [])
 	]
-}
+})

@@ -10,8 +10,8 @@ const pxtorem = require('postcss-pxtorem')
 const strip = (str, end) => str.substr(0, str.length - end.length)
 
 const config = context => {
-	const {mode, entry, out, outPath} = context
-	const plugins = transpilers.slice()
+	const {mode, entry, out, outPath, options} = context
+	const plugins = transpilers(options)
 	if (process.env.ANALYZE)
 		plugins.push(
 			new BundleAnalyzerPlugin({
@@ -49,7 +49,7 @@ module.exports = function(entry, output, options = {}) {
 		const devServer = process.env.DEV_SERVER
 		console.log(`Compiling for ${mode}`)
 		const isProd = mode == 'production'
-		const target = config({mode, ...context})
+		const target = config({mode, options, ...context})
 		const plugins = target.plugins
 		const less = new MiniCssExtractPlugin({
 			filename: path.parse(output).name + '.css'
@@ -60,6 +60,16 @@ module.exports = function(entry, output, options = {}) {
 			return ['style-loader'].concat(loaders)
 		}
 		if (!devServer) plugins.push(less)
+		const resolve = {
+			symlinks: false,
+			extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.css'],
+			modules: [srcPath, 'node_modules']
+		}
+		if (options.preact)
+			resolve.alias = {
+				react: 'preact/compat',
+				'react-dom': 'preact/compat'
+			}
 		return {
 			...target,
 			plugins: [
@@ -93,11 +103,7 @@ module.exports = function(entry, output, options = {}) {
 				warnings: true,
 				publicPath: false
 			},
-			resolve: {
-				symlinks: false,
-				extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.css'],
-				modules: [srcPath, 'node_modules']
-			},
+			resolve,
 			module: {
 				rules: [
 					{
