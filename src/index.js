@@ -6,12 +6,21 @@ const autoprefixer = require('autoprefixer')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const cssNano = require('cssnano')
 const pxtorem = require('postcss-pxtorem')
+const ManifestPlugin = require('webpack-manifest-plugin')
+const ImageminPlugin = require('imagemin-webpack-plugin').default
 
 const strip = (str, end) => str.substr(0, str.length - end.length)
 
 const config = context => {
-	const {mode, entry, out, outPath, options} = context
-	const plugins = transpilers(options)
+	const {mode, entry, out, outPath, options, suffix} = context
+	const isDev = mode !== 'production'
+	const plugins = transpilers(options).concat([
+		new ManifestPlugin(),
+		new ImageminPlugin({
+			disable: isDev,
+			pngquant: {quality: '95-100'}
+		})
+	])
 	if (process.env.ANALYZE)
 		plugins.push(
 			new BundleAnalyzerPlugin({
@@ -20,10 +29,11 @@ const config = context => {
 			})
 		)
 	return {
-		devtool: mode !== 'production' && '#inline-source-map',
+		devtool: isDev ? '#inline-source-map' : 'source-map',
 		output: {
 			path: path.resolve(outPath),
-			filename: out,
+			filename: `${out}.js`,
+			chunkFilename: `assets/[id].${out}${suffix}.js`,
 			publicPath: '/'
 		},
 		entry: path.resolve(entry),
@@ -35,8 +45,8 @@ const config = context => {
 module.exports = function(entry, output, options = {}) {
 	const src = path.basename(entry)
 	const srcPath = strip(entry, src)
-	const out = path.basename(output)
-	const outPath = strip(output, out)
+	const out = path.parse(output).name
+	const outPath = strip(output, path.basename(output))
 	const include = [
 		...(options.include ? options.include : []),
 		path.resolve(srcPath),
@@ -46,16 +56,18 @@ module.exports = function(entry, output, options = {}) {
 
 	return (env, argv) => {
 		const mode = argv.mode || process.env.NODE_ENV
+		const suffix = mode === 'production' ? '.[hash:8]' : ''
 		const devServer = process.env.DEV_SERVER
 		console.log(`Compiling for ${mode}`)
 		const isProd = mode == 'production'
-		const target = config({mode, options, ...context})
+		const target = config({mode, options, suffix, ...context})
 		const plugins = target.plugins
 		const less = new MiniCssExtractPlugin({
-			filename: path.parse(output).name + '.css'
+			filename: `${out}.css`,
+			chunkFilename: `assets/[id].${out}${suffix}.css`
 		})
 		const extract = loaders => {
-			if (!devServer) 
+			if (!devServer)
 				return [{loader: MiniCssExtractPlugin.loader}].concat(loaders)
 			return ['style-loader'].concat(loaders)
 		}
@@ -151,9 +163,7 @@ module.exports = function(entry, output, options = {}) {
 													  })
 													: []
 											)
-											.concat([
-												autoprefixer({grid: true})
-											])
+											.concat([autoprefixer({grid: true})])
 											.concat(isProd ? cssNano({preset: 'default'}) : [])
 								}
 							},
@@ -173,7 +183,7 @@ module.exports = function(entry, output, options = {}) {
 						use: {
 							loader: 'file-loader',
 							options: {
-								name: 'assets/fonts/[name].[ext]'
+								name: `assets/fonts/[name]${suffix}.[ext]`
 							}
 						},
 						sideEffects: true
@@ -185,7 +195,7 @@ module.exports = function(entry, output, options = {}) {
 							loader: 'sizeof-loader',
 							options: {
 								useFileLoader: true,
-								name: 'assets/images/[name].[ext]'
+								name: `assets/images/[name]${suffix}.[ext]`
 							}
 						},
 						sideEffects: true
@@ -196,7 +206,7 @@ module.exports = function(entry, output, options = {}) {
 						use: {
 							loader: 'file-loader',
 							options: {
-								name: 'assets/data/[name].[ext]'
+								name: `assets/data/[name]${suffix}.[ext]`
 							}
 						},
 						sideEffects: true
