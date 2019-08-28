@@ -119,6 +119,11 @@ module.exports = function(entry, output, options = {}) {
 			module: {
 				rules: [
 					{
+						test: /\.js$/,
+						use: ['source-map-loader'],
+						enforce: 'pre'
+					},
+					{
 						test: /\.(ts|tsx)$/,
 						include,
 						use: 'happypack/loader?id=ts',
