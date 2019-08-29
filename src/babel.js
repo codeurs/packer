@@ -1,4 +1,5 @@
 module.exports = options => ({
+	sourceType: 'unambiguous',
 	cacheDirectory: true,
 	presets: [
 		[
