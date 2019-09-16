@@ -17,7 +17,7 @@ const config = context => {
 	const plugins = transpilers(options).concat([
 		new ManifestPlugin(),
 		new ImageminPlugin({
-			disable: isDev,
+			disable: !options.imagemin || isDev,
 			pngquant: {quality: '95-100'}
 		})
 	])
