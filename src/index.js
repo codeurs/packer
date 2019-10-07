@@ -132,13 +132,13 @@ module.exports = function(entry, output, options = {}) {
 					{
 						test: /\.js$/,
 						include,
-						exclude: /node_modules/,
+						exclude: /core-js/,
 						use: 'happypack/loader?id=babel',
 						sideEffects: false
 					},
 					{
 						test: /\.mjs$/,
-						exclude: /node_modules/,
+						exclude: /core-js/,
 						type: 'javascript/auto'
 					},
 					{
