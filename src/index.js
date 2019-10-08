@@ -185,17 +185,41 @@ module.exports = function(entry, output, options = {}) {
 						sideEffects: true
 					},
 					{
-						test: /\.s[ac]ss$/i,
-						use: [
-							'style-loader',
-							'css-loader',
+						test: /\.s[ac]ss$/,
+						include,
+						use: extract([
+							{
+								loader: 'css-loader',
+								options: {
+									sourceMap: !isProd
+								}
+							},
+							{
+								loader: 'postcss-loader',
+								options: {
+									sourceMap: !isProd,
+									plugins: loader =>
+										[]
+											.concat(
+												options.pxToRem
+													? pxtorem({
+															propList: ['*'],
+															minPixelValue: 2
+													  })
+													: []
+											)
+											.concat([autoprefixer({grid: true})])
+											.concat(isProd ? cssNano({preset: 'default'}) : [])
+								}
+							},
 							{
 								loader: 'sass-loader',
 								options: {
 									implementation: require('sass')
 								}
 							}
-						]
+						]),
+						sideEffects: true
 					},
 					{
 						test: /\.(eot|ttf|woff|woff2)$/,
