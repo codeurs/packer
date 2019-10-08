@@ -74,7 +74,7 @@ module.exports = function(entry, output, options = {}) {
 		if (!devServer) plugins.push(less)
 		const resolve = {
 			symlinks: false,
-			extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.css'],
+			extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.css', '.scss', '.sass'],
 			modules: [srcPath, 'node_modules']
 		}
 		if (options.preact)
@@ -183,6 +183,19 @@ module.exports = function(entry, output, options = {}) {
 							}
 						]),
 						sideEffects: true
+					},
+					{
+						test: /\.s[ac]ss$/i,
+						use: [
+							'style-loader',
+							'css-loader',
+							{
+								loader: 'sass-loader',
+								options: {
+									implementation: require('sass')
+								}
+							}
+						]
 					},
 					{
 						test: /\.(eot|ttf|woff|woff2)$/,
