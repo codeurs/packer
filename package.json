@@ -1,6 +1,6 @@
 {
   "name": "@codeurs/packer",
-  "version": "0.18.0",
+  "version": "0.18.2",
   "description": "Our webpack config",
   "main": "src/index.js",
   "repository": "https://github.com/codeurs/packer",
@@ -34,6 +34,8 @@
     "postcss-loader": "^3.0.0",
     "postcss-pxtorem": "^4.0.1",
     "raw-loader": "^2.0.0",
+    "sass": "^1.23.0",
+    "sass-loader": "^8.0.0",
     "sizeof-loader": "^1.1.1",
     "source-map-loader": "^0.2.4",
     "ts-loader": "^5.4.3",

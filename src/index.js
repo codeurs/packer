@@ -74,7 +74,7 @@ module.exports = function(entry, output, options = {}) {
 		if (!devServer) plugins.push(less)
 		const resolve = {
 			symlinks: false,
-			extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.css'],
+			extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.css', '.scss', '.sass'],
 			modules: [srcPath, 'node_modules']
 		}
 		if (options.preact)
@@ -177,6 +177,43 @@ module.exports = function(entry, output, options = {}) {
 								options: {
 									sourceMap: !isProd,
 									paths: [srcPath, 'node_modules']
+								}
+							}
+						]),
+						sideEffects: true
+					},
+					{
+						test: /\.s[ac]ss$/,
+						include,
+						use: extract([
+							{
+								loader: 'css-loader',
+								options: {
+									sourceMap: !isProd
+								}
+							},
+							{
+								loader: 'postcss-loader',
+								options: {
+									sourceMap: !isProd,
+									plugins: loader =>
+										[]
+											.concat(
+												options.pxToRem
+													? pxtorem({
+															propList: ['*'],
+															minPixelValue: 2
+													  })
+													: []
+											)
+											.concat([autoprefixer({grid: true})])
+											.concat(isProd ? cssNano({preset: 'default'}) : [])
+								}
+							},
+							{
+								loader: 'sass-loader',
+								options: {
+									implementation: require('sass')
 								}
 							}
 						]),
