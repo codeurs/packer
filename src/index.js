@@ -74,7 +74,16 @@ module.exports = function(entry, output, options = {}) {
 		if (!devServer) plugins.push(less)
 		const resolve = {
 			symlinks: false,
-			extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.css', '.scss', '.sass'],
+			extensions: [
+				'.js',
+				'.mjs',
+				'.ts',
+				'.tsx',
+				'.less',
+				'.css',
+				'.scss',
+				'.sass'
+			],
 			modules: [srcPath, 'node_modules']
 		}
 		if (options.preact)
@@ -126,11 +135,19 @@ module.exports = function(entry, output, options = {}) {
 					{
 						test: /\.(ts|tsx)$/,
 						include,
-						use: 'happypack/loader?id=ts'
+						use: 'happypack/loader?id=ts',
+						sideEffects: false
 					},
 					{
 						test: /\.js$/,
 						include,
+						exclude: /core-js|node_modules/,
+						use: 'happypack/loader?id=babel',
+						sideEffects: false
+					},
+					{
+						test: /\.js$/,
+						include: path.resolve('./node_modules'),
 						exclude: /core-js/,
 						use: 'happypack/loader?id=babel'
 					},
