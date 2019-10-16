@@ -126,15 +126,13 @@ module.exports = function(entry, output, options = {}) {
 					{
 						test: /\.(ts|tsx)$/,
 						include,
-						use: 'happypack/loader?id=ts',
-						sideEffects: false
+						use: 'happypack/loader?id=ts'
 					},
 					{
 						test: /\.js$/,
 						include,
 						exclude: /core-js/,
-						use: 'happypack/loader?id=babel',
-						sideEffects: false
+						use: 'happypack/loader?id=babel'
 					},
 					{
 						test: /\.mjs$/,
