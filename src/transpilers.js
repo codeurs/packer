@@ -4,7 +4,7 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 const fs = require('fs')
 
 const babelLoader = options => ({
-	loader: 'babel-loader',
+	loader: require.resolve('babel-loader'),
 	options: babel(options)
 })
 
@@ -16,7 +16,7 @@ module.exports = options => [
 		loaders: [
 			babelLoader(options),
 			{
-				loader: 'ts-loader',
+				loader: require.resolve('ts-loader'),
 				options: {happyPackMode: true}
 			}
 		]

@@ -91,6 +91,27 @@ module.exports = function(entry, output, options = {}) {
 				react: 'preact/compat',
 				'react-dom': 'preact/compat'
 			}
+		const jsRules = [
+			{
+				test: /\.js$/,
+				use: require.resolve('source-map-loader'),
+				enforce: 'pre'
+			},
+			{
+				test: /\.js$/,
+				include,
+				exclude: /core-js|node_modules/,
+				use: 'happypack/loader?id=babel',
+				sideEffects: false
+			}
+		]
+		if (options.transpileDependencies)
+			jsRules.push({
+				test: /\.js$/,
+				include: path.resolve('./node_modules'),
+				exclude: /core-js/,
+				use: 'happypack/loader?id=babel'
+			})
 		return {
 			...target,
 			plugins: [
@@ -102,9 +123,6 @@ module.exports = function(entry, output, options = {}) {
 					SENTRY_CONNECTION: '',
 					SENTRY_DSN: '',
 					PROJECT_RELEASE: ''
-				}),
-				new webpack.ProvidePlugin({
-					m: 'mithril'
 				}),
 				...plugins
 			],
@@ -126,12 +144,7 @@ module.exports = function(entry, output, options = {}) {
 			},
 			resolve,
 			module: {
-				rules: [
-					{
-						test: /\.js$/,
-						use: ['source-map-loader'],
-						enforce: 'pre'
-					},
+				rules: jsRules.concat([
 					{
 						test: /\.(ts|tsx)$/,
 						include,
@@ -139,40 +152,22 @@ module.exports = function(entry, output, options = {}) {
 						sideEffects: false
 					},
 					{
-						test: /\.js$/,
-						include,
-						exclude: /core-js|node_modules/,
-						use: 'happypack/loader?id=babel',
-						sideEffects: false
-					},
-					{
-						test: /\.js$/,
-						include: path.resolve('./node_modules'),
-						exclude: /core-js/,
-						use: 'happypack/loader?id=babel'
-					},
-					{
 						test: /\.mjs$/,
 						exclude: /core-js/,
 						type: 'javascript/auto'
-					},
-					{
-						test: /\.font\.js$/,
-						use: extract(['css-loader', 'webfonts-loader']),
-						sideEffects: true
 					},
 					{
 						test: /\.(css|less)$/,
 						include,
 						use: extract([
 							{
-								loader: 'css-loader',
+								loader: require.resolve('css-loader'),
 								options: {
 									sourceMap: !isProd
 								}
 							},
 							{
-								loader: 'postcss-loader',
+								loader: require.resolve('postcss-loader'),
 								options: {
 									sourceMap: !isProd,
 									plugins: loader =>
@@ -190,7 +185,7 @@ module.exports = function(entry, output, options = {}) {
 								}
 							},
 							{
-								loader: 'less-loader',
+								loader: require.resolve('less-loader'),
 								options: {
 									sourceMap: !isProd,
 									paths: [srcPath, 'node_modules']
@@ -204,13 +199,13 @@ module.exports = function(entry, output, options = {}) {
 						include,
 						use: extract([
 							{
-								loader: 'css-loader',
+								loader: require.resolve('css-loader'),
 								options: {
 									sourceMap: !isProd
 								}
 							},
 							{
-								loader: 'postcss-loader',
+								loader: require.resolve('postcss-loader'),
 								options: {
 									sourceMap: !isProd,
 									plugins: loader =>
@@ -228,9 +223,9 @@ module.exports = function(entry, output, options = {}) {
 								}
 							},
 							{
-								loader: 'sass-loader',
+								loader: require.resolve('sass-loader'),
 								options: {
-									implementation: require('sass')
+									implementation: require('node-sass')
 								}
 							}
 						]),
@@ -240,7 +235,7 @@ module.exports = function(entry, output, options = {}) {
 						test: /\.(eot|ttf|woff|woff2)$/,
 						include,
 						use: {
-							loader: 'file-loader',
+							loader: require.resolve('file-loader'),
 							options: {
 								name: `assets/fonts/[name]${suffix}.[ext]`
 							}
@@ -251,7 +246,7 @@ module.exports = function(entry, output, options = {}) {
 						test: /\.(svg|jpg|png|gif)$/,
 						include,
 						use: {
-							loader: 'sizeof-loader',
+							loader: require.resolve('sizeof-loader'),
 							options: {
 								useFileLoader: true,
 								name: `assets/images/[name]${suffix}.[ext]`
@@ -263,7 +258,7 @@ module.exports = function(entry, output, options = {}) {
 						test: /\.(ico|webp|mp4|webm)$/,
 						include,
 						use: {
-							loader: 'file-loader',
+							loader: require.resolve('file-loader'),
 							options: {
 								name: `assets/data/[name]${suffix}.[ext]`
 							}
@@ -273,9 +268,9 @@ module.exports = function(entry, output, options = {}) {
 					{
 						test: /\.(glsl|obj|html)$/,
 						include,
-						use: 'raw-loader'
+						use: require.resolve('raw-loader')
 					}
-				]
+				])
 			}
 		}
 	}
