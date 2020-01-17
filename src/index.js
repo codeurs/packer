@@ -1,4 +1,4 @@
-const transpilers = require('./transpilers')
+const fs = require('fs')
 const path = require('path')
 const webpack = require('webpack')
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
@@ -7,20 +7,19 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const cssNano = require('cssnano')
 const pxtorem = require('postcss-pxtorem')
 const ManifestPlugin = require('webpack-manifest-plugin')
-const ImageminPlugin = require('imagemin-webpack-plugin').default
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 
 const strip = (str, end) => str.substr(0, str.length - end.length)
 
 const config = context => {
 	const {mode, entry, out, outPath, options, suffix} = context
 	const isDev = mode !== 'production'
-	const plugins = transpilers(options).concat([
+	const plugins = [
 		new ManifestPlugin(),
-		new ImageminPlugin({
-			disable: !options.imagemin || isDev,
-			pngquant: {quality: '95-100'}
+		new ForkTsCheckerWebpackPlugin({
+			tslint: fs.existsSync('tslint.json')
 		})
-	])
+	]
 	if (process.env.ANALYZE)
 		plugins.push(
 			new BundleAnalyzerPlugin({
@@ -101,7 +100,7 @@ module.exports = function(entry, output, options = {}) {
 				test: /\.js$/,
 				include,
 				exclude: /core-js|node_modules/,
-				use: 'happypack/loader?id=babel',
+				use: require.resolve('swc-loader'),
 				sideEffects: false
 			}
 		]
@@ -110,7 +109,7 @@ module.exports = function(entry, output, options = {}) {
 				test: /\.js$/,
 				include: path.resolve('./node_modules'),
 				exclude: /core-js/,
-				use: 'happypack/loader?id=babel'
+				use: require.resolve('swc-loader')
 			})
 		return {
 			...target,
@@ -148,13 +147,30 @@ module.exports = function(entry, output, options = {}) {
 					{
 						test: /\.(ts|tsx)$/,
 						include,
-						use: 'happypack/loader?id=ts',
+						use: {
+							loader: require.resolve('swc-loader'),
+							options: {
+								jsc: {
+									parser: {
+										syntax: 'typescript',
+										tsx: true,
+										decorators: true,
+										dynamicImport: true
+									}
+								}
+							}
+						},
 						sideEffects: false
 					},
 					{
 						test: /\.mjs$/,
 						exclude: /core-js/,
 						type: 'javascript/auto'
+					},
+					{
+						test: /\.font\.js$/,
+						use: extract(['css-loader', 'webfonts-loader']),
+						sideEffects: true
 					},
 					{
 						test: /\.(css|less)$/,
