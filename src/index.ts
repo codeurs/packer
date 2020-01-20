@@ -129,6 +129,7 @@ const postCssLoader = (isProd: boolean, options?: Options) => {
 export type Options = {
 	pxToRem?: boolean
 	preact?: boolean
+	typescriptCompiler?: 'ts' | 'swc'
 }
 
 type Env = string | Record<string, boolean | number | string>
@@ -146,6 +147,7 @@ export const packer = (
 	const mode: Mode = userMode || 'development'
 	const isProd = mode == 'production'
 	const suffix = mode === 'production' ? '.[hash:8]' : ''
+	const compiler = options.typescriptCompiler || 'ts'
 	return new Packer({
 		mode,
 		stats,
@@ -186,19 +188,32 @@ export const packer = (
 			})
 		)
 		.loader('js', require.resolve('source-map-loader'), {enforce: 'pre'})
-		.loader('ts|tsx', {
-			loader: require.resolve('swc-loader'),
-			options: {
-				jsc: {
-					parser: {
-						syntax: 'typescript',
-						tsx: true,
-						decorators: true,
-						dynamicImport: true
-					}
+		.loader('ts|tsx', [
+			require.resolve('cache-loader'),
+			{
+				loader: 'thread-loader',
+				options: {
+					workers: require('os').cpus().length - 1,
+					poolTimeout: Infinity
 				}
+			},
+			{
+				loader: require.resolve(`${compiler}-loader`),
+				options:
+					compiler === 'ts'
+						? {happyPackMode: true}
+						: {
+								jsc: {
+									parser: {
+										syntax: 'typescript',
+										tsx: true,
+										decorators: true,
+										dynamicImport: true
+									}
+								}
+						  }
 			}
-		})
+		])
 		.loaderWithSideEffects('less', [
 			MiniCssExtractPlugin.loader,
 			{
