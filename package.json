@@ -10,10 +10,13 @@
 		"build": "tsc",
 		"test": "TS_NODE_COMPILER_OPTIONS=\"{\\\"module\\\":\\\"commonjs\\\"}\" ts-node test/compile.ts"
 	},
+	"files": [
+		"dist",
+		"src"
+	],
 	"dependencies": {
 		"@swc/core": "^1.1.12",
 		"autoprefixer": "^9.7.4",
-		"babel-loader": "^8.0.6",
 		"cache-loader": "^4.1.0",
 		"core-js": "^3.6.4",
 		"css-loader": "^3.4.2",
