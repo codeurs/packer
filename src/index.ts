@@ -263,6 +263,11 @@ export const packer = (
 			}
 		})
 		.loaderWithSideEffects('glsl|obj|html', require.resolve('raw-loader'))
+		.loaderWithSideEffects('font.js', [
+			MiniCssExtractPlugin.loader,
+			require.resolve('css-loader'),
+			require.resolve('webfonts-loader')
+		])
 		.include(src.dir, 'node_modules/@codeurs')
 }
 
