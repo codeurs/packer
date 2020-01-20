@@ -2,10 +2,14 @@
 	"name": "@codeurs/packer",
 	"version": "0.21.0",
 	"description": "Our webpack config",
-	"main": "src/index.js",
+	"main": "dist/index.js",
 	"repository": "https://github.com/codeurs/packer",
 	"author": "Ben Merckx <ben@codeurs.be>",
 	"license": "MIT",
+	"scripts": {
+		"build": "tsc",
+		"test": "TS_NODE_COMPILER_OPTIONS=\"{\\\"module\\\":\\\"commonjs\\\"}\" ts-node test/compile.ts"
+	},
 	"dependencies": {
 		"@swc/core": "^1.1.12",
 		"autoprefixer": "^9.7.4",
@@ -13,6 +17,7 @@
 		"core-js": "^3.6.4",
 		"css-loader": "^3.4.2",
 		"cssnano": "^4.1.10",
+		"eslint": "^6.8.0",
 		"file-loader": "^5.0.2",
 		"fork-ts-checker-webpack-plugin": "^4.0.1",
 		"less": "^3.10.3",
@@ -26,12 +31,16 @@
 		"sizeof-loader": "^1.1.1",
 		"source-map-loader": "^0.2.4",
 		"swc-loader": "^0.1.6",
-		"ts-loader": "^6.2.1",
 		"typescript": "^3.7.4",
 		"webfonts-loader": "^5.1.1",
 		"webpack": "^4.41.5",
 		"webpack-bundle-analyzer": "^3.6.0",
 		"webpack-cli": "^3.3.10",
-		"webpack-manifest-plugin": "^2.2.0"
+		"webpack-manifest-plugin": "3.0.0-rc.0"
+	},
+	"devDependencies": {
+		"@types/autoprefixer": "^9.6.1",
+		"@types/webpack": "^4.41.2",
+		"ts-node": "^8.6.2"
 	}
 }
