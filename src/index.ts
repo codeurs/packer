@@ -16,7 +16,7 @@ import {
 	RuleSetUse
 } from 'webpack'
 import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer'
-import LiveReloadPlugin from 'webpack-livereload-plugin'
+import LiveReloadPlugin from 'webpack-livereload-plugin-css'
 import ManifestPlugin from 'webpack-manifest-plugin'
 
 type Mode = 'development' | 'production' | 'none'
@@ -272,7 +272,7 @@ export const packer = (
 			{
 				loader: require.resolve('sass-loader'),
 				options: {
-					implementation: require('node-sass')
+					implementation: require('sass')
 				}
 			}
 		])

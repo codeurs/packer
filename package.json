@@ -26,10 +26,10 @@
 		"less": "^3.10.3",
 		"less-loader": "^5.0.0",
 		"mini-css-extract-plugin": "^0.6.0",
-		"node-sass": "^4.13.1",
 		"postcss-loader": "^3.0.0",
 		"postcss-pxtorem": "^4.0.1",
 		"raw-loader": "^4.0.0",
+		"sass": "^1.25.0",
 		"sass-loader": "^8.0.2",
 		"sizeof-loader": "^1.1.1",
 		"source-map-loader": "^0.2.4",
@@ -40,7 +40,7 @@
 		"webpack": "^4.41.5",
 		"webpack-bundle-analyzer": "^3.6.0",
 		"webpack-cli": "^3.3.10",
-		"webpack-livereload-plugin": "^2.2.0",
+		"webpack-livereload-plugin-css": "^0.11.0-2",
 		"webpack-manifest-plugin": "3.0.0-rc.0"
 	},
 	"devDependencies": {
