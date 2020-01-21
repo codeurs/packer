@@ -237,7 +237,7 @@ export const packer = (
 				},
 				{
 					loader: require.resolve('ts-loader'),
-					options: {transpileOnly: true}
+					options: {happyPackMode: true}
 				}
 			],
 			{sideEffects: false}
