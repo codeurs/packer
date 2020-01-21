@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"outDir": "dist",
+		"module": "commonjs",
+		"target": "es5",
+		"types": ["node"],
+		"lib": ["es2019"],
+		"moduleResolution": "node",
+		"sourceMap": true,
+		"forceConsistentCasingInFileNames": true,
+		"strictNullChecks": true,
+		"declaration": true,
+		"declarationMap": true,
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"downlevelIteration": true,
+		"resolveJsonModule": true
+	},
+	"include": ["src/**/*"],
+	"exclude": ["node_modules"]
+}
