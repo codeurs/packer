@@ -169,7 +169,8 @@ export const packer = (
 		packer = packer.plugin(
 			new LiveReloadPlugin({
 				port: 0,
-				appendScriptTag: true
+				appendScriptTag: true,
+				quiet: true
 			})
 		)
 	}
