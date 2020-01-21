@@ -1,20 +1,23 @@
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
-import {
-	Configuration,
-	RuleSetRule,
-	RuleSetUse,
-	Plugin,
-	Module,
-	Resolve,
-	EnvironmentPlugin,
-	CliConfigOptions
-} from 'webpack'
-import path from 'path'
-import ManifestPlugin from 'webpack-manifest-plugin'
-import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import autoprefixer from 'autoprefixer'
 import cssNano from 'cssnano'
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
+import {existsSync} from 'fs'
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
+import path from 'path'
 import pxtorem from 'postcss-pxtorem'
+import {
+	CliConfigOptions,
+	Configuration,
+	EnvironmentPlugin,
+	Module,
+	Plugin,
+	Resolve,
+	RuleSetRule,
+	RuleSetUse
+} from 'webpack'
+import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer'
+import LiveReloadPlugin from 'webpack-livereload-plugin'
+import ManifestPlugin from 'webpack-manifest-plugin'
 
 type Mode = 'development' | 'production' | 'none'
 
@@ -26,6 +29,7 @@ export const merge = (a: Configuration, b: Configuration): Configuration => {
 }
 
 class Packer implements Configuration {
+	mode: Mode
 	module?: Module
 	resolve?: Resolve
 
@@ -55,20 +59,13 @@ class Packer implements Configuration {
 								})$`
 							),
 							use,
+							sideEffects: true,
 							...rest
 						}
 					]
 				}
 			})
 		)
-	}
-
-	loaderWithSideEffects(
-		extensions: string | Array<string>,
-		use: RuleSetUse,
-		rest: Partial<RuleSetRule> = {}
-	) {
-		return this.loader(extensions, use, {sideEffects: true, ...rest})
 	}
 
 	include(...paths: Array<string>) {
@@ -84,8 +81,24 @@ class Packer implements Configuration {
 		)
 	}
 
+	set(config: Configuration) {
+		return new Packer(merge(this, config))
+	}
+
 	toConfig(): Configuration {
 		return Object.assign({}, this)
+	}
+
+	isProd() {
+		return this.mode === 'production'
+	}
+
+	static from(env: Env, argv: ArgV) {
+		const userMode: any = argv.mode || process.env.NODE_ENV
+		const mode: Mode = userMode || 'development'
+		const isProd = mode === 'production'
+		const devtool = isProd ? 'source-map' : 'eval'
+		return new Packer({mode, devtool})
 	}
 }
 
@@ -132,6 +145,11 @@ export type Options = {
 	typescriptCompiler?: 'ts' | 'swc'
 }
 
+export type Context = {
+	production: boolean
+	suffix: string
+}
+
 type Env = string | Record<string, boolean | number | string>
 type ArgV = CliConfigOptions
 
@@ -139,37 +157,51 @@ export const packer = (
 	entry: string,
 	output: string,
 	options: Options = {}
-) => (env: Env, argv: ArgV): Packer => {
+) => (environment: Env, argv: ArgV): Packer => {
+	const env = (name: string) =>
+		environment && typeof environment !== 'string' && environment[name]
+	let packer = Packer.from(environment, argv)
 	const src = path.parse(entry)
 	const out = path.parse(output)
-	//const info = require('package.json')
-	const userMode: any = argv.mode || (typeof env !== 'string' && env.NODE_ENV)
-	const mode: Mode = userMode || 'development'
-	const isProd = mode == 'production'
-	const suffix = mode === 'production' ? '.[hash:8]' : ''
-	const compiler = options.typescriptCompiler || 'ts'
-	return new Packer({
-		mode,
-		stats,
-		devtool: isProd ? 'source-map' : 'eval',
-		entry: path.resolve(entry),
-		output: {
-			path: path.resolve(out.dir),
-			filename: `${out.name}.js`,
-			chunkFilename: `assets/[id].${out.name}${suffix}.js`,
-			publicPath: '/'
-		},
-		resolve: {
-			extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.scss', '.sass'],
-			modules: [src.dir, 'node_modules'],
-			alias: options?.preact
-				? {
-						react: 'preact/compat',
-						'react-dom': 'preact/compat'
-				  }
-				: {} // todo: load from package.json
-		}
-	})
+	const isProd = packer.isProd()
+	const suffix = isProd ? '.[hash:8]' : ''
+	if (!isProd && env('reload')) {
+		packer = packer.plugin(
+			new LiveReloadPlugin({
+				port: 0,
+				appendScriptTag: true
+			})
+		)
+	}
+	if (env('analyze')) {
+		packer = packer.plugin(
+			new BundleAnalyzerPlugin({
+				analyzerHost: '0.0.0.0',
+				analyzerPort: env('analyze')
+			})
+		)
+	}
+	return packer
+		.set({
+			stats,
+			entry: path.resolve(entry),
+			output: {
+				path: path.resolve(out.dir),
+				filename: `${out.name}.js`,
+				chunkFilename: `assets/[id].${out.name}${suffix}.js`,
+				publicPath: '/'
+			},
+			resolve: {
+				extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.scss', '.sass'],
+				modules: [src.dir, 'node_modules'],
+				alias: options?.preact
+					? {
+							react: 'preact/compat',
+							'react-dom': 'preact/compat'
+					  }
+					: {} // todo: load from package.json
+			}
+		})
 		.plugin(
 			new MiniCssExtractPlugin({
 				filename: `${out.name}.css`,
@@ -177,7 +209,11 @@ export const packer = (
 			})
 		)
 		.plugin(new ManifestPlugin())
-		.plugin(new ForkTsCheckerWebpackPlugin())
+		.plugin(
+			new ForkTsCheckerWebpackPlugin({
+				eslint: existsSync('.eslintrc.js')
+			})
+		)
 		.plugin(
 			new EnvironmentPlugin({
 				NODE_ENV: 'development',
@@ -188,33 +224,25 @@ export const packer = (
 			})
 		)
 		.loader('js', require.resolve('source-map-loader'), {enforce: 'pre'})
-		.loader('ts|tsx', [
-			require.resolve('cache-loader'),
-			{
-				loader: 'thread-loader',
-				options: {
-					workers: require('os').cpus().length - 1,
-					poolTimeout: Infinity
+		.loader(
+			'ts|tsx',
+			[
+				require.resolve('cache-loader'),
+				{
+					loader: 'thread-loader',
+					options: {
+						workers: require('os').cpus().length - 1,
+						poolTimeout: Infinity
+					}
+				},
+				{
+					loader: require.resolve('ts-loader'),
+					options: {transpileOnly: true}
 				}
-			},
-			{
-				loader: require.resolve(`${compiler}-loader`),
-				options:
-					compiler === 'ts'
-						? {happyPackMode: true}
-						: {
-								jsc: {
-									parser: {
-										syntax: 'typescript',
-										tsx: true,
-										decorators: true,
-										dynamicImport: true
-									}
-								}
-						  }
-			}
-		])
-		.loaderWithSideEffects('less', [
+			],
+			{sideEffects: false}
+		)
+		.loader('less', [
 			MiniCssExtractPlugin.loader,
 			{
 				loader: require.resolve('css-loader'),
@@ -231,7 +259,7 @@ export const packer = (
 				}
 			}
 		])
-		.loaderWithSideEffects('scss|sass', [
+		.loader('scss|sass', [
 			MiniCssExtractPlugin.loader,
 			{
 				loader: require.resolve('css-loader'),
@@ -247,23 +275,23 @@ export const packer = (
 				}
 			}
 		])
-		.loaderWithSideEffects('eot|ttf|woff|woff2', {
+		.loader('eot|ttf|woff|woff2', {
 			loader: require.resolve('file-loader'),
 			options: {name: `assets/fonts/[name]${suffix}.[ext]`}
 		})
-		.loaderWithSideEffects('ico|webp|mp4|webm', {
+		.loader('ico|webp|mp4|webm', {
 			loader: require.resolve('file-loader'),
 			options: {name: `assets/fonts/[name]${suffix}.[ext]`}
 		})
-		.loaderWithSideEffects('svg|jpg|png|gif', {
+		.loader('svg|jpg|png|gif', {
 			loader: require.resolve('sizeof-loader'),
 			options: {
 				useFileLoader: true,
 				name: `assets/images/[name]${suffix}.[ext]`
 			}
 		})
-		.loaderWithSideEffects('glsl|obj|html', require.resolve('raw-loader'))
-		.loaderWithSideEffects('font.js', [
+		.loader('glsl|obj|html', require.resolve('raw-loader'))
+		.loader('font.js', [
 			MiniCssExtractPlugin.loader,
 			require.resolve('css-loader'),
 			require.resolve('webfonts-loader')
