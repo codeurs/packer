@@ -97,7 +97,7 @@ class Packer implements Configuration {
 		const userMode: any = argv.mode || process.env.NODE_ENV
 		const mode: Mode = userMode || 'development'
 		const isProd = mode === 'production'
-		const devtool = isProd ? 'source-map' : 'eval'
+		const devtool = isProd ? 'source-map' : 'inline-source-map'
 		return new Packer({mode, devtool})
 	}
 }
