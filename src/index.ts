@@ -211,6 +211,7 @@ export const packer = (
 		.plugin(new ManifestPlugin())
 		.plugin(
 			new ForkTsCheckerWebpackPlugin({
+				checkSyntacticErrors: true,
 				eslint: existsSync('.eslintrc.js')
 			})
 		)
