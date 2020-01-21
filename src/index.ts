@@ -139,6 +139,11 @@ const postCssLoader = (isProd: boolean, options?: Options) => {
 	}
 }
 
+const tsLoader = {
+	loader: require.resolve('ts-loader'),
+	options: {happyPackMode: true}
+}
+
 export type Options = {
 	pxToRem?: boolean
 	preact?: boolean
@@ -230,20 +235,19 @@ export const packer = (
 		.loader('js', require.resolve('source-map-loader'), {enforce: 'pre'})
 		.loader(
 			'ts|tsx',
-			[
-				require.resolve('cache-loader'),
-				{
-					loader: 'thread-loader',
-					options: {
-						workers: require('os').cpus().length - 1,
-						poolTimeout: Infinity
-					}
-				},
-				{
-					loader: require.resolve('ts-loader'),
-					options: {happyPackMode: true}
-				}
-			],
+			isProd
+				? tsLoader
+				: [
+						require.resolve('cache-loader'),
+						{
+							loader: 'thread-loader',
+							options: {
+								workers: require('os').cpus().length - 1,
+								poolTimeout: Infinity
+							}
+						},
+						tsLoader
+				  ],
 			{sideEffects: false}
 		)
 		.loader('less', [
