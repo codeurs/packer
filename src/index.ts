@@ -16,8 +16,8 @@ import {
 	RuleSetUse
 } from 'webpack'
 import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer'
-import LiveReloadPlugin from 'webpack-livereload-plugin-css'
 import ManifestPlugin from 'webpack-manifest-plugin'
+import {LiveReloadPlugin} from './livereloadplugin'
 
 type Mode = 'development' | 'production' | 'none'
 
@@ -181,6 +181,9 @@ export const packer = (
 			})
 		)
 	}
+	if (isProd) {
+		packer = packer.plugin(new ManifestPlugin())
+	}
 	return packer
 		.set({
 			stats,
@@ -208,7 +211,6 @@ export const packer = (
 				chunkFilename: `assets/[id].${out.name}${suffix}.css`
 			})
 		)
-		.plugin(new ManifestPlugin())
 		.plugin(
 			new ForkTsCheckerWebpackPlugin({
 				checkSyntacticErrors: true,
