@@ -13,7 +13,8 @@ import {
 	Plugin,
 	Resolve,
 	RuleSetRule,
-	RuleSetUse
+	RuleSetUse,
+	RuleSetConditions
 } from 'webpack'
 import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer'
 import ManifestPlugin from 'webpack-manifest-plugin'
@@ -72,7 +73,9 @@ class Packer implements Configuration {
 		const rules =
 			this.module?.rules?.map(rule => ({
 				...rule,
-				include: paths.map(p => path.resolve(p))
+				include: ([] as RuleSetConditions)
+					.concat(rule.include ?? [])
+					.concat(paths.map(p => path.resolve(p)))
 			})) ?? []
 		return new Packer(
 			Object.assign({}, this, {
@@ -233,6 +236,11 @@ export const packer = (
 			})
 		)
 		.loader('js', require.resolve('source-map-loader'), {enforce: 'pre'})
+		.loader('font.js', [
+			MiniCssExtractPlugin.loader,
+			require.resolve('css-loader'),
+			require.resolve('webfonts-loader')
+		])
 		.loader(
 			'js|ts|tsx',
 			isProd
@@ -299,11 +307,6 @@ export const packer = (
 			}
 		})
 		.loader('glsl|obj|html', require.resolve('raw-loader'))
-		.loader('font.js', [
-			MiniCssExtractPlugin.loader,
-			require.resolve('css-loader'),
-			require.resolve('webfonts-loader')
-		])
 		.include(src.dir, 'node_modules/@codeurs')
 }
 
