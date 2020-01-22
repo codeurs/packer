@@ -233,7 +233,6 @@ export const packer = (
 			})
 		)
 		.loader('js', require.resolve('source-map-loader'), {enforce: 'pre'})
-		.loader('js', require.resolve('babel-loader'))
 		.loader(
 			'js|ts|tsx',
 			isProd
