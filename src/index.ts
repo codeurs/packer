@@ -233,8 +233,9 @@ export const packer = (
 			})
 		)
 		.loader('js', require.resolve('source-map-loader'), {enforce: 'pre'})
+		.loader('js', require.resolve('babel-loader'))
 		.loader(
-			'ts|tsx',
+			'js|ts|tsx',
 			isProd
 				? tsLoader
 				: [
