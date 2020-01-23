@@ -60,7 +60,6 @@ class Packer implements Configuration {
 								})$`
 							),
 							use,
-							sideEffects: true,
 							...rest
 						}
 					]
@@ -255,8 +254,7 @@ export const packer = (
 							}
 						},
 						tsLoader
-				  ],
-			{sideEffects: false}
+				  ]
 		)
 		.loader('less', [
 			MiniCssExtractPlugin.loader,
