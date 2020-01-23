@@ -141,6 +141,14 @@ const postCssLoader = (isProd: boolean, options?: Options) => {
 	}
 }
 
+const sizeOfLoader = (suffix: string) => ({
+	loader: require.resolve('sizeof-loader'),
+	options: {
+		useFileLoader: true,
+		name: `assets/images/[name]${suffix}.[ext]`
+	}
+})
+
 const tsLoader = {
 	loader: require.resolve('ts-loader'),
 	options: {happyPackMode: true}
@@ -149,7 +157,7 @@ const tsLoader = {
 export type Options = {
 	pxToRem?: boolean
 	preact?: boolean
-	typescriptCompiler?: 'ts' | 'swc'
+	svgAsReactComponent?: boolean
 }
 
 export type Context = {
@@ -191,6 +199,15 @@ export const packer = (
 	}
 	if (isProd) {
 		packer = packer.plugin(new ManifestPlugin())
+	}
+	if (options?.svgAsReactComponent) {
+		packer = packer.loader('svg', [
+			require.resolve('@svgr/webpack'),
+			{
+				loader: require.resolve('file-loader'),
+				options: {name: `assets/images/[name]${suffix}.[ext]`}
+			}
+		])
 	}
 	return packer
 		.set({
@@ -297,13 +314,7 @@ export const packer = (
 			loader: require.resolve('file-loader'),
 			options: {name: `assets/fonts/[name]${suffix}.[ext]`}
 		})
-		.loader('svg|jpg|png|gif', {
-			loader: require.resolve('sizeof-loader'),
-			options: {
-				useFileLoader: true,
-				name: `assets/images/[name]${suffix}.[ext]`
-			}
-		})
+		.loader('svg|jpg|png|gif', sizeOfLoader(suffix))
 		.loader('glsl|obj|html', require.resolve('raw-loader'))
 		.include(src.dir, 'node_modules/@codeurs')
 }

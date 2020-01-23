@@ -16,6 +16,7 @@
 		"src"
 	],
 	"dependencies": {
+		"@svgr/webpack": "^5.1.0",
 		"autoprefixer": "^9.7.4",
 		"cache-loader": "^4.1.0",
 		"css-loader": "^3.4.2",
