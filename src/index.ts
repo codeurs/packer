@@ -13,7 +13,8 @@ import {
 	Plugin,
 	Resolve,
 	RuleSetRule,
-	RuleSetUse
+	RuleSetUse,
+	RuleSetConditions
 } from 'webpack'
 import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer'
 import ManifestPlugin from 'webpack-manifest-plugin'
@@ -59,7 +60,6 @@ class Packer implements Configuration {
 								})$`
 							),
 							use,
-							sideEffects: true,
 							...rest
 						}
 					]
@@ -72,7 +72,9 @@ class Packer implements Configuration {
 		const rules =
 			this.module?.rules?.map(rule => ({
 				...rule,
-				include: paths.map(p => path.resolve(p))
+				include: ([] as RuleSetConditions)
+					.concat(rule.include ?? [])
+					.concat(paths.map(p => path.resolve(p)))
 			})) ?? []
 		return new Packer(
 			Object.assign({}, this, {
@@ -137,6 +139,11 @@ const postCssLoader = (isProd: boolean, options?: Options) => {
 				.concat(isProd ? cssNano({preset: 'default'}) : [])
 		}
 	}
+}
+
+const tsLoader = {
+	loader: require.resolve('ts-loader'),
+	options: {happyPackMode: true}
 }
 
 export type Options = {
@@ -228,23 +235,26 @@ export const packer = (
 			})
 		)
 		.loader('js', require.resolve('source-map-loader'), {enforce: 'pre'})
+		.loader('font.js', [
+			MiniCssExtractPlugin.loader,
+			require.resolve('css-loader'),
+			require.resolve('webfonts-loader')
+		])
 		.loader(
-			'ts|tsx',
-			[
-				require.resolve('cache-loader'),
-				{
-					loader: 'thread-loader',
-					options: {
-						workers: require('os').cpus().length - 1,
-						poolTimeout: Infinity
-					}
-				},
-				{
-					loader: require.resolve('ts-loader'),
-					options: {happyPackMode: true}
-				}
-			],
-			{sideEffects: false}
+			'js|ts|tsx',
+			isProd
+				? tsLoader
+				: [
+						require.resolve('cache-loader'),
+						{
+							loader: 'thread-loader',
+							options: {
+								workers: require('os').cpus().length - 1,
+								poolTimeout: Infinity
+							}
+						},
+						tsLoader
+				  ]
 		)
 		.loader('less', [
 			MiniCssExtractPlugin.loader,
@@ -295,11 +305,6 @@ export const packer = (
 			}
 		})
 		.loader('glsl|obj|html', require.resolve('raw-loader'))
-		.loader('font.js', [
-			MiniCssExtractPlugin.loader,
-			require.resolve('css-loader'),
-			require.resolve('webfonts-loader')
-		])
 		.include(src.dir, 'node_modules/@codeurs')
 }
 
