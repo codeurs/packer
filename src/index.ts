@@ -201,13 +201,21 @@ export const packer = (
 		packer = packer.plugin(new ManifestPlugin())
 	}
 	if (options?.svgAsReactComponent) {
-		packer = packer.loader('svg', [
-			require.resolve('@svgr/webpack'),
+		packer = packer.loader(
+			'svg',
+			[
+				require.resolve('@svgr/webpack'),
+				{
+					loader: require.resolve('url-loader'),
+					options: {name: `assets/images/[name]${suffix}.[ext]`}
+				}
+			],
 			{
-				loader: require.resolve('url-loader'),
-				options: {name: `assets/images/[name]${suffix}.[ext]`}
+				issuer: {
+					test: /\.tsx?$/
+				}
 			}
-		])
+		)
 	}
 	return packer
 		.set({
