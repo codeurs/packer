@@ -204,7 +204,7 @@ export const packer = (
 		packer = packer.loader('svg', [
 			require.resolve('@svgr/webpack'),
 			{
-				loader: require.resolve('file-loader'),
+				loader: require.resolve('url-loader'),
 				options: {name: `assets/images/[name]${suffix}.[ext]`}
 			}
 		])
