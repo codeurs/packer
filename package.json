@@ -8,6 +8,7 @@
 	"license": "MIT",
 	"scripts": {
 		"dev": "tsc && webpack --mode development --watch --env.reload --env.analyze 3000",
+		"prepublishOnly": "yarn build",
 		"build": "tsc",
 		"test": "TS_NODE_COMPILER_OPTIONS=\"{\\\"module\\\":\\\"commonjs\\\"}\" ts-node test/compile.ts"
 	},
