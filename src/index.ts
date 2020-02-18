@@ -158,6 +158,7 @@ export type Options = {
 	pxToRem?: boolean
 	preact?: boolean
 	svgAsReactComponent?: boolean
+	modules?: boolean
 }
 
 export type Context = {
@@ -217,6 +218,18 @@ export const packer = (
 			}
 		)
 	}
+	const resolve: Resolve = {
+		extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.scss', '.sass'],
+		alias: options?.preact
+			? {
+					react: 'preact/compat',
+					'react-dom': 'preact/compat'
+			  }
+			: {} // todo: load from package.json
+	}
+	if (options?.modules !== false) {
+		resolve.modules = [src.dir, 'node_modules']
+	}
 	return packer
 		.set({
 			stats,
@@ -227,16 +240,7 @@ export const packer = (
 				chunkFilename: `assets/[id].${out.name}${suffix}.js`,
 				publicPath: '/'
 			},
-			resolve: {
-				extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.scss', '.sass'],
-				modules: [src.dir, 'node_modules'],
-				alias: options?.preact
-					? {
-							react: 'preact/compat',
-							'react-dom': 'preact/compat'
-					  }
-					: {} // todo: load from package.json
-			}
+			resolve
 		})
 		.plugin(
 			new MiniCssExtractPlugin({
