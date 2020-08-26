@@ -2,8 +2,7 @@ import webpack from 'webpack'
 import packer from '../src/index'
 
 const config = packer(__dirname + '/example/index.tsx', './build/index.js', {
-	preact: true,
-	svgAsReactComponent: true
+	preact: true
 })
 const test = config('', {})
 

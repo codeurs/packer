@@ -70,11 +70,11 @@ class Packer implements Configuration {
 
 	include(...paths: Array<string>) {
 		const rules =
-			this.module?.rules?.map(rule => ({
+			this.module?.rules?.map((rule) => ({
 				...rule,
 				include: ([] as RuleSetConditions)
 					.concat(rule.include ?? [])
-					.concat(paths.map(p => path.resolve(p)))
+					.concat(paths.map((p) => path.resolve(p)))
 			})) ?? []
 		return new Packer(
 			Object.assign({}, this, {
@@ -150,8 +150,23 @@ const sizeOfLoader = (suffix: string) => ({
 })
 
 const tsLoader = {
-	loader: require.resolve('ts-loader'),
-	options: {happyPackMode: true}
+	loader: require.resolve('swc-loader'),
+	options: {
+		env: {
+			mode: 'usage',
+			coreJs: 3,
+			loose: true,
+			targets: {
+				ie: '11'
+			}
+		},
+		jsc: {
+			parser: {
+				syntax: 'typescript',
+				tsx: true
+			}
+		}
+	}
 }
 
 export type Options = {
@@ -201,23 +216,6 @@ export const packer = (
 	if (isProd) {
 		packer = packer.plugin(new ManifestPlugin())
 	}
-	if (options?.svgAsReactComponent) {
-		packer = packer.loader(
-			'svg',
-			[
-				require.resolve('@svgr/webpack'),
-				{
-					loader: require.resolve('url-loader'),
-					options: {name: `assets/images/[name]${suffix}.[ext]`}
-				}
-			],
-			{
-				issuer: {
-					test: /\.tsx?$/
-				}
-			}
-		)
-	}
 	const resolve: Resolve = {
 		extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.scss', '.sass'],
 		alias: options?.preact
@@ -264,27 +262,7 @@ export const packer = (
 			})
 		)
 		.loader('js', require.resolve('source-map-loader'), {enforce: 'pre'})
-		.loader('font.js', [
-			MiniCssExtractPlugin.loader,
-			require.resolve('css-loader'),
-			require.resolve('webfonts-loader')
-		])
-		.loader(
-			'js|ts|tsx',
-			isProd
-				? tsLoader
-				: [
-						require.resolve('cache-loader'),
-						{
-							loader: 'thread-loader',
-							options: {
-								workers: require('os').cpus().length - 1,
-								poolTimeout: Infinity
-							}
-						},
-						tsLoader
-				  ]
-		)
+		.loader('js|ts|tsx', tsLoader)
 		.loader('less', [
 			MiniCssExtractPlugin.loader,
 			{
@@ -326,7 +304,19 @@ export const packer = (
 			loader: require.resolve('file-loader'),
 			options: {name: `assets/fonts/[name]${suffix}.[ext]`}
 		})
-		.loader('svg|jpg|png|gif', sizeOfLoader(suffix))
+		.loader('jpg|png|gif', sizeOfLoader(suffix))
+		.loader(
+			'svg',
+			options?.svgAsReactComponent
+				? [
+						require.resolve('@svgr/webpack'),
+						{
+							loader: require.resolve('file-loader'),
+							options: {name: `assets/images/[name]${suffix}.[ext]`}
+						}
+				  ]
+				: sizeOfLoader(suffix)
+		)
 		.loader('glsl|obj|html', require.resolve('raw-loader'))
 		.include(src.dir, 'node_modules/@codeurs')
 }
