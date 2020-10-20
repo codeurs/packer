@@ -55,7 +55,7 @@ class Packer implements Configuration {
 							test: new RegExp(
 								`\.(${
 									typeof extensions === 'string'
-										? extensions
+										? extensions.split('.').join('\\.')
 										: extensions.join('|')
 								})$`
 							),
@@ -217,7 +217,7 @@ export const packer = (
 		packer = packer.plugin(new ManifestPlugin())
 	}
 	const resolve: Resolve = {
-		extensions: ['.js', '.mjs', '.ts', '.tsx', '.less', '.scss', '.sass'],
+		extensions: ['.js', '.mjs', '.ts', '.tsx', '.scss', '.sass'],
 		alias: options?.preact
 			? {
 					react: 'preact/compat',
@@ -246,12 +246,7 @@ export const packer = (
 				chunkFilename: `assets/[id].${out.name}${suffix}.css`
 			})
 		)
-		.plugin(
-			new ForkTsCheckerWebpackPlugin({
-				checkSyntacticErrors: true,
-				eslint: existsSync('.eslintrc.js')
-			})
-		)
+		.plugin(new ForkTsCheckerWebpackPlugin({}))
 		.plugin(
 			new EnvironmentPlugin({
 				NODE_ENV: 'development',
@@ -263,29 +258,17 @@ export const packer = (
 		)
 		.loader('js', require.resolve('source-map-loader'), {enforce: 'pre'})
 		.loader('js|ts|tsx', tsLoader)
-		.loader('less', [
-			MiniCssExtractPlugin.loader,
-			{
-				loader: require.resolve('css-loader'),
-				options: {
-					sourceMap: !isProd
-				}
-			},
-			postCssLoader(isProd, options),
-			{
-				loader: require.resolve('less-loader'),
-				options: {
-					sourceMap: !isProd,
-					paths: [src.dir, 'node_modules']
-				}
-			}
-		])
 		.loader('scss|sass', [
 			MiniCssExtractPlugin.loader,
 			{
 				loader: require.resolve('css-loader'),
 				options: {
-					sourceMap: !isProd
+					sourceMap: !isProd,
+					modules: {
+						auto: true,
+						localIdentName: '[local]-[hash:base64:7]',
+						exportLocalsConvention: 'asIs'
+					}
 				}
 			},
 			postCssLoader(isProd, options),

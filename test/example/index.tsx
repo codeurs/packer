@@ -1,8 +1,8 @@
-import styles from './style'
 import {ReactComponent as Test} from './test.svg'
 import asUrl from './test.svg'
 import {render} from 'react-dom'
 import React from 'react'
+import styles from './test.module.scss'
 
 console.log(styles)
 console.log(<Test />)

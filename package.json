@@ -10,7 +10,7 @@
 		"dev": "tsc && webpack --mode development --watch --env.reload --env.analyze 3000",
 		"prepublishOnly": "yarn build",
 		"build": "tsc",
-		"test": "cross-env TS_NODE_COMPILER_OPTIONS=\"{\\\"module\\\":\\\"commonjs\\\"}\" ts-node test/compile.ts"
+		"test": "esbuild-node test/compile.ts"
 	},
 	"files": [
 		"dist",
@@ -21,15 +21,12 @@
 		"@swc/core": "^1.2.21",
 		"autoprefixer": "^9.8.6",
 		"core-js": "^3.6.5",
-		"css-loader": "^3.4.2",
+		"css-loader": "^5.0.0",
 		"cssnano": "^4.1.10",
-		"eslint": "^7.7.0",
 		"file-loader": "^5.0.2",
-		"fork-ts-checker-webpack-plugin": "^4.0.1",
-		"less": "^3.10.3",
-		"less-loader": "^5.0.0",
+		"fork-ts-checker-webpack-plugin": "^5.2.0",
 		"md5": "^2.2.1",
-		"mini-css-extract-plugin": "^0.6.0",
+		"mini-css-extract-plugin": "^1.1.0",
 		"postcss-loader": "^3.0.0",
 		"postcss-pxtorem": "^4.0.1",
 		"raw-loader": "^4.0.0",
@@ -50,6 +47,8 @@
 		"@types/autoprefixer": "^9.6.1",
 		"@types/webpack": "^4.41.2",
 		"cross-env": "^7.0.2",
+		"esbuild": "^0.7.17",
+		"esbuild-node": "^0.3.0",
 		"preact": "^10.2.1",
 		"ts-node": "^8.6.2",
 		"typescript": "^4.0.2"

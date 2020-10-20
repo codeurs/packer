@@ -1,7 +1,7 @@
 import webpack from 'webpack'
 import packer from '../src/index'
 
-const config = packer(__dirname + '/example/index.tsx', './build/index.js', {
+const config = packer('./test/example/index.tsx', './build/index.js', {
 	preact: true
 })
 const test = config('', {})
