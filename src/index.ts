@@ -149,31 +149,12 @@ const sizeOfLoader = (suffix: string) => ({
 	}
 })
 
-const tsLoader = {
-	loader: require.resolve('swc-loader'),
-	options: {
-		env: {
-			mode: 'usage',
-			coreJs: 3,
-			loose: true,
-			targets: {
-				ie: '11'
-			}
-		},
-		jsc: {
-			parser: {
-				syntax: 'typescript',
-				tsx: true
-			}
-		}
-	}
-}
-
 export type Options = {
 	pxToRem?: boolean
 	preact?: boolean
 	svgAsReactComponent?: boolean
 	modules?: boolean
+	polyfill?: boolean
 }
 
 export type Context = {
@@ -257,7 +238,28 @@ export const packer = (
 			})
 		)
 		.loader('js', require.resolve('source-map-loader'), {enforce: 'pre'})
-		.loader('js|ts|tsx', tsLoader)
+		.loader('js|ts|tsx', {
+			loader: require.resolve('swc-loader'),
+			options: {
+				env: options.polyfill
+					? {
+							mode: 'usage',
+							coreJs: '3',
+							targets: {
+								ie: '11'
+							}
+					  }
+					: {},
+				jsc: {
+					target: 'es5',
+					loose: true,
+					parser: {
+						syntax: 'typescript',
+						tsx: true
+					}
+				}
+			}
+		})
 		.loader('scss|sass', [
 			MiniCssExtractPlugin.loader,
 			{
