@@ -19,6 +19,7 @@
 	"dependencies": {
 		"@svgr/webpack": "^5.4.0",
 		"@swc/core": "^1.2.21",
+		"@swc/helpers": "^0.2.2",
 		"autoprefixer": "^9.8.6",
 		"core-js": "^3.6.5",
 		"css-loader": "^5.0.0",

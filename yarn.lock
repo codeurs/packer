@@ -1164,6 +1164,11 @@
     progress "^2.0.3"
     "true-case-path" "^1.0.3"
 
+"@swc/helpers@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@swc/helpers/-/helpers-0.2.2.tgz#373c8497beec7d7dec43e1d8ac631f3cfb8a3821"
+  integrity sha512-QmSGJMdqel9UfXUyLtv8nMpBL+FmwpHfhUYVIbJoSnhOdBtcARmWkhFRGNTMvpHoGj2gu36vl63dajux0ltF8Q==
+
 "@types/anymatch@*":
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/@types/anymatch/-/anymatch-1.3.1.tgz#336badc1beecb9dacc38bea2cf32adf627a8421a"

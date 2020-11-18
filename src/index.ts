@@ -251,11 +251,17 @@ export const packer = (
 					  }
 					: {},
 				jsc: {
+					externalHelpers: true,
 					target: 'es5',
 					loose: true,
 					parser: {
 						syntax: 'typescript',
-						tsx: true
+						tsx: true,
+						decorators: true
+					},
+					transform: {
+						legacyDecorator: true,
+						decoratorMetadata: true
 					}
 				}
 			}
