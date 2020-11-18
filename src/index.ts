@@ -155,6 +155,7 @@ export type Options = {
 	svgAsReactComponent?: boolean
 	modules?: boolean
 	polyfill?: boolean
+	helpers?: boolean
 }
 
 export type Context = {
@@ -251,7 +252,7 @@ export const packer = (
 					  }
 					: {},
 				jsc: {
-					externalHelpers: true,
+					externalHelpers: options.helpers,
 					target: 'es5',
 					loose: true,
 					parser: {
