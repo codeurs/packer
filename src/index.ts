@@ -275,7 +275,7 @@ export const packer = (
 					sourceMap: !isProd,
 					modules: {
 						auto: true,
-						localIdentName: '[local]-[hash:base64:7]',
+						localIdentName: '[name]_[local]-[hash:base64:7]',
 						exportLocalsConvention: 'asIs'
 					}
 				}
