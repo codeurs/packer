@@ -258,7 +258,8 @@ export const packer = (
 					parser: {
 						syntax: 'typescript',
 						tsx: true,
-						decorators: true
+						decorators: true,
+						dynamicImport: true
 					},
 					transform: {
 						legacyDecorator: true,
