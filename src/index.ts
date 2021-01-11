@@ -225,7 +225,8 @@ export const packer = (
 		.plugin(
 			new MiniCssExtractPlugin({
 				filename: `${out.name}.css`,
-				chunkFilename: `assets/[id].${out.name}${suffix}.css`
+				chunkFilename: `assets/[id].${out.name}${suffix}.css`,
+				ignoreOrder: true
 			})
 		)
 		.plugin(new ForkTsCheckerWebpackPlugin({}))
