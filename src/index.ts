@@ -156,6 +156,7 @@ export type Options = {
 	modules?: boolean
 	polyfill?: boolean
 	helpers?: boolean
+	publicPath?: string
 }
 
 export type Context = {
@@ -218,7 +219,7 @@ export const packer = (
 				path: path.resolve(out.dir),
 				filename: `${out.name}.js`,
 				chunkFilename: `assets/[id].${out.name}${suffix}.js`,
-				publicPath: '/'
+				publicPath: options.publicPath || '/'
 			},
 			resolve
 		})
